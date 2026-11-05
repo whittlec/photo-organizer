@@ -33,8 +33,9 @@ meson compile -C build
 ./build/photo-organizer
 ```
 
-The photo-folder chooser opens in the standard Pictures folder configured by
-the desktop environment, when that folder exists.
+The standard Pictures folder configured by the desktop environment is
+selected automatically when it exists. Use “Choose Photo Folder…” to select
+a different folder. The chooser also opens in the Pictures folder by default.
 
 After installing with `meson install -C build`, the app icon and launcher entry
 are installed for your desktop environment. Launch Photo Organizer from the

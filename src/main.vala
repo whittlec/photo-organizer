@@ -64,6 +64,14 @@ namespace PhotoOrganizer {
             organize_button.set_sensitive (false);
             organize_button.clicked.connect (start_organizing);
 
+            string? pictures_path = Environment.get_user_special_dir (UserDirectory.PICTURES);
+            if (pictures_path != null && FileUtils.test (pictures_path, FileTest.IS_DIR)) {
+                source_path = pictures_path;
+                folder_label.set_text (pictures_path);
+                organize_button.set_sensitive (true);
+                status_label.set_text (_("Ready to analyze the selected folder."));
+            }
+
             Box content = new Box (Orientation.VERTICAL, 18) {
                 margin_top = 24,
                 margin_bottom = 24,
