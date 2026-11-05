@@ -95,6 +95,10 @@ namespace PhotoOrganizer {
 
         private void choose_folder () {
             Gtk.FileDialog chooser = new Gtk.FileDialog () { title = _("Choose Photo Folder") };
+            string? pictures_path = Environment.get_user_special_dir (UserDirectory.PICTURES);
+            if (pictures_path != null && FileUtils.test (pictures_path, FileTest.IS_DIR)) {
+                chooser.initial_folder = File.new_for_path (pictures_path);
+            }
             chooser.select_folder.begin (this, null, (object, response) => {
                 try {
                     GLib.File? selected = chooser.select_folder.end (response);

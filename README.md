@@ -29,6 +29,9 @@ meson compile -C build
 ./build/photo-organizer
 ```
 
+The photo-folder chooser opens in the standard Pictures folder configured by
+the desktop environment, when that folder exists.
+
 After installing with `meson install -C build`, the app icon and launcher entry
 are installed for your desktop environment. Launch Photo Organizer from the
 GNOME app grid for GNOME Shell to match the running app with its desktop entry
