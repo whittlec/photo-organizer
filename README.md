@@ -63,6 +63,21 @@ symlink exclusions, invalid input and output paths, supported photo formats,
 and progress reporting. The GTK window and interactive dialogs are not
 automated; verify those manually in a GNOME session.
 
+To generate source-level coverage for the organizer tests, install `gcovr`
+and enable Meson's coverage instrumentation:
+
+```sh
+sudo apt install gcovr
+meson setup build --reconfigure -Db_coverage=true
+meson compile -C build
+meson test -C build --print-errorlogs
+gcovr --root . --filter 'src/organizer\.vala$' \
+  --html-details=build/coverage.html --html-single-page --txt-summary
+```
+
+Open `build/coverage.html` for the annotated report. The filter keeps the
+report focused on the organizer implementation exercised by the tests.
+
 ## Translations
 
 The application uses GNU gettext. To update the translation template after
