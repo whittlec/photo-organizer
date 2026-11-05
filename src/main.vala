@@ -86,8 +86,10 @@ namespace PhotoOrganizer {
             about.set_application_name (_("Photo Organizer"));
             about.set_application_icon ("org.example.PhotoOrganizer");
             about.set_version ("0.1.0");
-            about.set_developer_name (_("Photo Organizer contributors"));
+            about.set_developer_name ("William Whittle");
             about.set_comments (_("Organize photos by capture date and find exact duplicates."));
+            about.set_copyright ("© 2026 William Whittle");
+            about.set_license_type (Gtk.License.GPL_3_0);
             about.present (this);
         }
 
