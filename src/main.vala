@@ -18,6 +18,7 @@ namespace PhotoOrganizer {
                 default_width: 620,
                 default_height: 420
             );
+            set_icon_name ("org.example.PhotoOrganizer");
 
             Adw.HeaderBar header = new Adw.HeaderBar ();
             Label title = new Label (_("Photo Organizer"));
@@ -83,6 +84,7 @@ namespace PhotoOrganizer {
         private void show_about () {
             Adw.AboutDialog about = new Adw.AboutDialog ();
             about.set_application_name (_("Photo Organizer"));
+            about.set_application_icon ("org.example.PhotoOrganizer");
             about.set_version ("0.1.0");
             about.set_developer_name (_("Photo Organizer contributors"));
             about.set_comments (_("Organize photos by capture date and find exact duplicates."));

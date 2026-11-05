@@ -37,6 +37,15 @@ executable(
 
 subdir('po')
 
+install_data(
+  'data/org.example.PhotoOrganizer.svg',
+  install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps'),
+)
+install_data(
+  'data/org.example.PhotoOrganizer.desktop',
+  install_dir: join_paths(get_option('datadir'), 'applications'),
+)
+
 test_exe = executable(
   'organizer-test',
   'tests/organizer-test.vala',

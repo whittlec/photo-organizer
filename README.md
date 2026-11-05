@@ -29,6 +29,20 @@ meson compile -C build
 ./build/photo-organizer
 ```
 
+After installing with `meson install -C build`, the app icon and launcher entry
+are installed for your desktop environment. Launch Photo Organizer from the
+GNOME app grid for GNOME Shell to match the running app with its desktop entry
+and show the icon in the dock; the About dialog and window also use the app
+icon. For a per-user install that GNOME discovers, use the standard
+`~/.local` prefix:
+
+```sh
+meson configure build --prefix="$HOME/.local"
+meson setup build --reconfigure
+meson compile -C build
+meson install -C build
+```
+
 To run the tests:
 
 ```sh
