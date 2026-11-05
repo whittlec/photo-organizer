@@ -66,3 +66,16 @@ run_target(
     'cd "$MESON_SOURCE_ROOT" && exec dpkg-buildpackage --build=binary --no-sign',
   ],
 )
+
+release_script = files('scripts/release.sh')
+release_shell = find_program('sh')
+
+run_target(
+  'release-artifacts',
+  command: [release_shell, release_script, meson.project_version(), 'artifacts'],
+)
+
+run_target(
+  'release',
+  command: [release_shell, release_script, meson.project_version(), 'publish'],
+)

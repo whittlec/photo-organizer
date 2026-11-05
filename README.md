@@ -74,6 +74,35 @@ The package also installs AppStream metadata in `/usr/share/metainfo`, which
 provides GNOME Software with the app description, features, categories,
 developer, license, and age rating.
 
+## Preparing and publishing a release
+
+With a clean, committed working tree, the `release-artifacts` target runs the
+tests, builds the Debian package and source archive from `HEAD`, and writes
+SHA-256 checksums under `build/release/`. It does not publish anything:
+
+```sh
+meson compile -C build release-artifacts
+```
+
+To publish a GitHub Release, first commit all changes, create and push a tag
+matching the Meson project version (for example, `v0.1.0`), and authenticate
+the GitHub CLI with permission to create releases. Install `gh` if needed:
+
+```sh
+sudo apt install gh
+git tag -a v0.1.0 -m "Photo Organizer 0.1.0"
+git push origin v0.1.0
+gh auth login
+meson compile -C build release
+```
+
+The `release` target requires a clean working tree, verifies that the version
+tag points to `HEAD`, reruns tests and packaging, then publishes the `.deb`,
+source archive, and checksums with generated release notes. The remote tag
+must already exist. It requires `gh`, `dpkg-buildpackage`, and the Debian
+development dependencies documented above. Publishing does not submit the app
+to Flathub.
+
 To run the tests:
 
 ```sh
