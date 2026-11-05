@@ -1,4 +1,4 @@
-# Photo Organizer
+# Photo Organiser
 
 A GNOME application written in Vala with GTK 4 and libadwaita. It scans the
 chosen folder recursively, flags byte-for-byte duplicates using SHA-256, and
@@ -44,9 +44,10 @@ changing user-visible strings:
 ninja -C build photo-organizer-pot
 ```
 
-To start a translation, create a PO file from `po/photo-organizer.pot`, add its
-locale code to `po/LINGUAS`, then reconfigure and rebuild so Meson includes
-the new catalog. For example:
+The `en_GB` catalogue provides British English wording. To start another
+translation, create a PO file from `po/photo-organizer.pot`, add its locale
+code to `po/LINGUAS`, then reconfigure and rebuild so Meson includes the new
+catalogue. For example:
 
 ```sh
 msginit --input=po/photo-organizer.pot --locale=fr --output-file=po/fr.po
@@ -56,5 +57,5 @@ meson compile -C build
 ```
 
 Use `ninja -C build photo-organizer-update-po` to refresh existing PO files
-after updating the template. The compiled catalogs are installed under
+after updating the template. The compiled catalogues are installed under
 `<localedir>/<locale>/LC_MESSAGES/photo-organizer.mo`.
