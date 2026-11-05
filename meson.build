@@ -38,15 +38,15 @@ executable(
 subdir('po')
 
 install_data(
-  'data/org.example.PhotoOrganizer.svg',
+  'data/com.github.whittlec.PhotoOrganizer.svg',
   install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps'),
 )
 install_data(
-  'data/org.example.PhotoOrganizer.desktop',
+  'data/com.github.whittlec.PhotoOrganizer.desktop',
   install_dir: join_paths(get_option('datadir'), 'applications'),
 )
 install_data(
-  'data/org.example.PhotoOrganizer.metainfo.xml',
+  'data/com.github.whittlec.PhotoOrganizer.metainfo.xml',
   install_dir: join_paths(get_option('datadir'), 'metainfo'),
 )
 

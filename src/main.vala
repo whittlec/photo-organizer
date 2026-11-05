@@ -18,7 +18,7 @@ namespace PhotoOrganizer {
                 default_width: 620,
                 default_height: 420
             );
-            set_icon_name ("org.example.PhotoOrganizer");
+            set_icon_name ("com.github.whittlec.PhotoOrganizer");
 
             Adw.HeaderBar header = new Adw.HeaderBar ();
             Label title = new Label (_("Photo Organizer"));
@@ -92,7 +92,7 @@ namespace PhotoOrganizer {
         private void show_about () {
             Adw.AboutDialog about = new Adw.AboutDialog ();
             about.set_application_name (_("Photo Organizer"));
-            about.set_application_icon ("org.example.PhotoOrganizer");
+            about.set_application_icon ("com.github.whittlec.PhotoOrganizer");
             about.set_version ("0.1.0");
             about.set_developer_name ("William Whittle");
             about.set_comments (_("Organize photos by capture date and find exact duplicates."));
@@ -220,7 +220,7 @@ namespace PhotoOrganizer {
     public class Application : Adw.Application {
         public Application () {
             Object (
-                application_id: "org.example.PhotoOrganizer",
+                application_id: "com.github.whittlec.PhotoOrganizer",
                 flags: ApplicationFlags.DEFAULT_FLAGS
             );
         }

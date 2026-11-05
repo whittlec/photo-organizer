@@ -63,8 +63,8 @@ sudo apt install build-essential debhelper gettext \
 dpkg-buildpackage --build=binary --no-sign
 ```
 
-The resulting `photo-organizer_0.1.0-3_*.deb` is written to the parent
-directory. Install it with `sudo apt install ../photo-organizer_0.1.0-3_*.deb`.
+The resulting `photo-organizer_0.1.0-4_*.deb` is written to the parent
+directory. Install it with `sudo apt install ../photo-organizer_0.1.0-4_*.deb`.
 The package installs the app, GNOME launcher and icon, and translations into
 the system directories. Debian package metadata and dependency versions are in
 `debian/`.
