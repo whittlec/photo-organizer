@@ -1,0 +1,25 @@
+Source: photo-organizer
+Section: graphics
+Priority: optional
+Maintainer: William Whittle <whittlec@users.noreply.github.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ gettext,
+ libadwaita-1-dev (>= 1.5),
+ libgee-0.8-dev,
+ libgexiv2-dev (>= 0.14),
+ libgtk-4-dev (>= 4.12),
+ meson (>= 1.0),
+ valac
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+
+Package: photo-organizer
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Description: organize photos by capture date and find exact duplicates
+ Photo Organizer scans a selected directory, identifies byte-for-byte
+ duplicate photos, and arranges unique images in year/month folders based
+ on their capture date. Extra duplicate copies are moved aside.

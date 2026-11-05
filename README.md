@@ -51,6 +51,24 @@ meson compile -C build
 meson install -C build
 ```
 
+## Debian package
+
+The project includes Debian packaging metadata targeting Debian Trixie. To
+build a `.deb` on Trixie, install the package build tools and project
+dependencies, then build the binary package from the project root:
+
+```sh
+sudo apt install build-essential debhelper gettext \
+  libadwaita-1-dev libgee-0.8-dev libgexiv2-dev libgtk-4-dev meson valac
+dpkg-buildpackage --build=binary --no-sign
+```
+
+The resulting `photo-organizer_0.1.0-1_*.deb` is written to the parent
+directory. Install it with `sudo apt install ../photo-organizer_0.1.0-1_*.deb`.
+The package installs the app, GNOME launcher and icon, and translations into
+the system directories. Debian package metadata and dependency versions are in
+`debian/`.
+
 To run the tests:
 
 ```sh

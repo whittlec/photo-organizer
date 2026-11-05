@@ -1,0 +1,5 @@
+photo-organizer (0.1.0-1) trixie; urgency=medium
+
+  * Initial Debian package for Debian Trixie.
+
+ -- William Whittle <whittlec@users.noreply.github.com>  Thu, 05 Nov 2026 20:36:00 +0000
