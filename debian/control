@@ -19,7 +19,7 @@ Architecture: any
 Depends:
  ${misc:Depends},
  ${shlibs:Depends}
-Description: organize photos by capture date and find exact duplicates
+Description: Organize photos by capture date and find exact duplicates
  Photo Organizer scans a selected directory, identifies byte-for-byte
  duplicate photos, and arranges unique images in year/month folders based
  on their capture date. Extra duplicate copies are moved aside.

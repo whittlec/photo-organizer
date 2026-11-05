@@ -57,3 +57,12 @@ test_exe = executable(
   dependencies: [dependency('gdk-pixbuf-2.0'), gexiv2_dep, gee_dep],
 )
 test('organizer', test_exe)
+
+run_target(
+  'debian-package',
+  command: [
+    'sh',
+    '-c',
+    'cd "$MESON_SOURCE_ROOT" && exec dpkg-buildpackage --build=binary --no-sign',
+  ],
+)
