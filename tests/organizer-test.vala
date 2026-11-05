@@ -37,18 +37,22 @@ namespace PhotoOrganizer.Tests {
         }
     }
 
-    private void write_photo_with_exif (string path) {
+    private void write_photo_with_exif_tag (string path, string tag, string value) {
         try {
             Gdk.Pixbuf image = new Gdk.Pixbuf (Gdk.Colorspace.RGB, false, 8, 2, 2);
             image.fill ((uint32) 0x808080ff);
             image.savev (path, "jpeg", null, null);
             GExiv2.Metadata metadata = new GExiv2.Metadata ();
             metadata.open_path (path);
-            metadata.try_set_tag_string ("Exif.Photo.DateTimeOriginal", "2020:03:04 05:06:07");
+            metadata.try_set_tag_string (tag, value);
             metadata.save_file (path);
         } catch (Error error) {
             Test.fail_printf ("Could not create EXIF test photo: %s", error.message);
         }
+    }
+
+    private void write_photo_with_exif (string path) {
+        write_photo_with_exif_tag (path, "Exif.Photo.DateTimeOriginal", "2020:03:04 05:06:07");
     }
 
     private OrganizeResult organize_temporary_directory (string path, string? protected_wallpaper_directory = null) {
@@ -143,8 +147,24 @@ namespace PhotoOrganizer.Tests {
         write_file (existing, "existing photo");
 
         OrganizeResult result = organize_temporary_directory (temporary);
+        string collision = Path.build_filename (output_directory, "same (2).png");
         GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
-        GLib.assert_true (FileUtils.test (Path.build_filename (output_directory, "same (2).png"), FileTest.EXISTS));
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_true (FileUtils.test (existing, FileTest.EXISTS));
+        GLib.assert_true (FileUtils.test (collision, FileTest.EXISTS));
+        string? contents = null;
+        try {
+            FileUtils.get_contents (existing, out contents);
+        } catch (Error error) {
+            Test.fail_printf ("Could not read existing photo: %s", error.message);
+        }
+        GLib.assert_cmpstr (contents, CompareOperator.EQ, "existing photo");
+        try {
+            FileUtils.get_contents (collision, out contents);
+        } catch (Error error) {
+            Test.fail_printf ("Could not read collision photo: %s", error.message);
+        }
+        GLib.assert_cmpstr (contents, CompareOperator.EQ, "new photo");
         remove_tree (temporary);
     }
 
@@ -165,6 +185,238 @@ namespace PhotoOrganizer.Tests {
             (uint64) new DateTime.local (2020, 3, 4, 5, 6, 7).to_unix ()
         );
         remove_tree (temporary);
+    }
+
+    private void test_uses_digitized_date_when_original_date_is_missing () {
+        string temporary = make_temporary_directory ();
+        string photo = Path.build_filename (temporary, "digitized.jpg");
+        write_photo_with_exif_tag (photo, "Exif.Photo.DateTimeDigitized", "2019:11:12 13:14:15");
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+        string organized_photo = Path.build_filename (temporary, "2019", "11", "digitized.jpg");
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
+        GLib.assert_cmpuint (result.filesystem_dates, CompareOperator.EQ, 0);
+        GLib.assert_true (FileUtils.test (organized_photo, FileTest.EXISTS));
+        GLib.assert_true (
+            get_modified_time (organized_photo) ==
+            (uint64) new DateTime.local (2019, 11, 12, 13, 14, 15).to_unix ()
+        );
+        remove_tree (temporary);
+    }
+
+    private void test_falls_back_to_file_date_for_invalid_exif () {
+        string temporary = make_temporary_directory ();
+        string photo = Path.build_filename (temporary, "invalid-exif.jpg");
+        write_photo_with_exif_tag (photo, "Exif.Photo.DateTimeOriginal", "not a valid date");
+        set_modified_time (photo, 1600000000);
+        DateTime captured = new DateTime.from_unix_local (1600000000);
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+        string organized_photo = Path.build_filename (
+            temporary, captured.format ("%Y"), captured.format ("%m"), "invalid-exif.jpg"
+        );
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
+        GLib.assert_cmpuint (result.filesystem_dates, CompareOperator.EQ, 1);
+        GLib.assert_true (FileUtils.test (organized_photo, FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
+    private void test_ignores_non_photo_files_and_accepts_case_insensitive_extensions () {
+        string temporary = make_temporary_directory ();
+        string uppercase_photo = Path.build_filename (temporary, "PHOTO.JpG");
+        string document = Path.build_filename (temporary, "notes.txt");
+        write_file (uppercase_photo, "photo");
+        write_file (document, "not a photo");
+        DateTime captured = new DateTime.from_unix_local ((int64) get_modified_time (uppercase_photo));
+        string organized_photo = Path.build_filename (
+            temporary, captured.format ("%Y"), captured.format ("%m"), "PHOTO.JpG"
+        );
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
+        GLib.assert_true (FileUtils.test (organized_photo, FileTest.EXISTS));
+        GLib.assert_true (FileUtils.test (document, FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
+    private void test_moves_all_extra_copies_of_three_identical_photos () {
+        string temporary = make_temporary_directory ();
+        string first = Path.build_filename (temporary, "one.jpg");
+        string second = Path.build_filename (temporary, "two.jpg");
+        string third = Path.build_filename (temporary, "three.jpg");
+        write_file (first, "same photo");
+        write_file (second, "same photo");
+        write_file (third, "same photo");
+        set_modified_time (first, 1700000000);
+        set_modified_time (second, 1600000000);
+        set_modified_time (third, 1500000000);
+        DateTime captured = new DateTime.from_unix_local (1500000000);
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
+        GLib.assert_cmpuint (result.duplicate_files, CompareOperator.EQ, 2);
+        GLib.assert_cmpuint (result.duplicate_files_moved, CompareOperator.EQ, 2);
+        GLib.assert_true (FileUtils.test (Path.build_filename (
+            temporary, captured.format ("%Y"), captured.format ("%m"), "three.jpg"
+        ), FileTest.EXISTS));
+        GLib.assert_true (FileUtils.test (Path.build_filename (temporary, "Disorganized Photos", "one.jpg"), FileTest.EXISTS));
+        GLib.assert_true (FileUtils.test (Path.build_filename (temporary, "Disorganized Photos", "two.jpg"), FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
+    private void test_empty_and_non_photo_folders_do_not_create_output () {
+        string temporary = make_temporary_directory ();
+        write_file (Path.build_filename (temporary, "notes.txt"), "not a photo");
+        uint progress_events = 0;
+        bool first_event_is_indeterminate = false;
+        OrganizeResult result;
+        try {
+            result = organize (temporary, (message, fraction, determinate) => {
+                if (progress_events == 0) {
+                    first_event_is_indeterminate = !determinate && fraction == 0;
+                }
+                progress_events++;
+            });
+        } catch (Error error) {
+            Test.fail_printf ("Could not organize empty test directory: %s", error.message);
+            remove_tree (temporary);
+            return;
+        }
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.duplicate_files, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (progress_events, CompareOperator.EQ, 1);
+        GLib.assert_true (first_event_is_indeterminate);
+        GLib.assert_false (FileUtils.test (Path.build_filename (temporary, "Disorganized Photos"), FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
+    private void test_progress_is_determinate_monotonic_and_finishes_at_one () {
+        string temporary = make_temporary_directory ();
+        write_file (Path.build_filename (temporary, "one.jpg"), "first");
+        write_file (Path.build_filename (temporary, "two.jpg"), "second");
+        double last_fraction = 0;
+        bool saw_indeterminate = false;
+        bool saw_determinate = false;
+        bool monotonic = true;
+        OrganizeResult result;
+        try {
+            result = organize (temporary, (message, fraction, determinate) => {
+                if (!determinate) {
+                    saw_indeterminate = true;
+                    return;
+                }
+                saw_determinate = true;
+                if (fraction < last_fraction || fraction < 0 || fraction > 1) {
+                    monotonic = false;
+                }
+                last_fraction = fraction;
+            });
+        } catch (Error error) {
+            Test.fail_printf ("Could not organize progress test directory: %s", error.message);
+            remove_tree (temporary);
+            return;
+        }
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_true (saw_indeterminate);
+        GLib.assert_true (saw_determinate);
+        GLib.assert_true (monotonic);
+        GLib.assert_cmpfloat (last_fraction, CompareOperator.EQ, 1.0);
+        remove_tree (temporary);
+    }
+
+    private void test_disorganized_folder_is_ignored_on_repeat_run () {
+        string temporary = make_temporary_directory ();
+        string disorganized = Path.build_filename (temporary, "Disorganized Photos");
+        DirUtils.create (disorganized, 0755);
+        string photo = Path.build_filename (disorganized, "photo.jpg");
+        write_file (photo, "leave this aside");
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.duplicate_files, CompareOperator.EQ, 0);
+        GLib.assert_true (FileUtils.test (photo, FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
+    private void test_symlinked_photos_and_directories_are_not_followed () {
+        string temporary = make_temporary_directory ();
+        string outside = make_temporary_directory ();
+        string external_photo = Path.build_filename (outside, "external.jpg");
+        write_file (external_photo, "external photo");
+        string photo_link = Path.build_filename (temporary, "linked.jpg");
+        string directory_link = Path.build_filename (temporary, "linked-directory");
+        try {
+            File.new_for_path (photo_link).make_symbolic_link (external_photo);
+            File.new_for_path (directory_link).make_symbolic_link (outside);
+        } catch (Error error) {
+            Test.skip_printf ("Symbolic links are unavailable: %s", error.message);
+            remove_tree (temporary);
+            remove_tree (outside);
+            return;
+        }
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 0);
+        GLib.assert_true (FileUtils.test (external_photo, FileTest.EXISTS));
+        GLib.assert_true (FileUtils.test (photo_link, FileTest.IS_SYMLINK));
+        GLib.assert_true (FileUtils.test (directory_link, FileTest.IS_SYMLINK));
+        remove_tree (temporary);
+        remove_tree (outside);
+    }
+
+    private void test_rejects_missing_source_directory () {
+        string temporary = make_temporary_directory ();
+        string missing = Path.build_filename (temporary, "missing");
+        bool failed = false;
+        try {
+            organize (missing, (message, fraction, determinate) => {});
+        } catch (FileError error) {
+            failed = error.code == FileError.NOTDIR;
+        } catch (Error error) {
+            Test.fail_printf ("Unexpected error for missing source directory: %s", error.message);
+        }
+        GLib.assert_true (failed);
+        remove_tree (temporary);
+    }
+
+    private void test_rejects_disorganized_output_symlink () {
+        string temporary = make_temporary_directory ();
+        string target = make_temporary_directory ();
+        string output_link = Path.build_filename (temporary, "Disorganized Photos");
+        bool failed = false;
+        try {
+            File.new_for_path (output_link).make_symbolic_link (target);
+        } catch (Error error) {
+            Test.skip_printf ("Symbolic links are unavailable: %s", error.message);
+            remove_tree (temporary);
+            remove_tree (target);
+            return;
+        }
+        try {
+            organize (temporary, (message, fraction, determinate) => {});
+        } catch (IOError error) {
+            failed = error.code == IOError.FAILED;
+        } catch (Error error) {
+            Test.fail_printf ("Unexpected error for output symlink: %s", error.message);
+        }
+        GLib.assert_true (failed);
+        remove_tree (temporary);
+        remove_tree (target);
     }
 
     private void test_organized_folders_are_not_scanned_again () {
@@ -283,6 +535,16 @@ namespace PhotoOrganizer.Tests {
         Test.add_func ("/organizer/moves-legacy-organized-photos", test_moves_photos_from_legacy_organized_folder);
         Test.add_func ("/organizer/scans-unorganized-year-folder", test_scans_year_named_input_folder_without_month_folders);
         Test.add_func ("/organizer/leaves-wallpaper-slideshow-directory-alone", test_leaves_wallpaper_slideshow_directory_alone);
+        Test.add_func ("/organizer/empty-folder-progress", test_empty_and_non_photo_folders_do_not_create_output);
+        Test.add_func ("/organizer/progress-is-monotonic", test_progress_is_determinate_monotonic_and_finishes_at_one);
+        Test.add_func ("/organizer/ignores-disorganized-folder", test_disorganized_folder_is_ignored_on_repeat_run);
+        Test.add_func ("/organizer/does-not-follow-symlinks", test_symlinked_photos_and_directories_are_not_followed);
+        Test.add_func ("/organizer/rejects-missing-source", test_rejects_missing_source_directory);
+        Test.add_func ("/organizer/rejects-output-symlink", test_rejects_disorganized_output_symlink);
+        Test.add_func ("/organizer/uses-digitized-exif-date", test_uses_digitized_date_when_original_date_is_missing);
+        Test.add_func ("/organizer/falls-back-on-invalid-exif", test_falls_back_to_file_date_for_invalid_exif);
+        Test.add_func ("/organizer/filters-photo-formats", test_ignores_non_photo_files_and_accepts_case_insensitive_extensions);
+        Test.add_func ("/organizer/moves-all-duplicate-copies", test_moves_all_extra_copies_of_three_identical_photos);
         return Test.run ();
     }
 }

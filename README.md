@@ -57,6 +57,12 @@ To run the tests:
 meson test -C build --print-errorlogs
 ```
 
+The organizer regression tests cover duplicate selection and preservation,
+EXIF and filesystem date handling, reruns and legacy folders, wallpaper and
+symlink exclusions, invalid input and output paths, supported photo formats,
+and progress reporting. The GTK window and interactive dialogs are not
+automated; verify those manually in a GNOME session.
+
 ## Translations
 
 The application uses GNU gettext. To update the translation template after
