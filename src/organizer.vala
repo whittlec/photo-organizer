@@ -103,13 +103,13 @@ namespace PhotoOrganizer {
                         );
                         photos.add (new PhotoFile (path, info.get_attribute_uint64 ("time::modified")));
                     } catch (Error error) {
-                        errors.add ("Could not read modification time for %s: %s".printf (path, error.message));
+                        errors.add (_("Could not read modification time for %s: %s").printf (path, error.message));
                         photos.add (new PhotoFile (path, uint64.MAX));
                     }
                 }
             }
         } catch (FileError error) {
-            errors.add ("Could not scan %s: %s".printf (directory, error.message));
+            errors.add (_("Could not scan %s: %s").printf (directory, error.message));
         }
     }
 
@@ -165,7 +165,7 @@ namespace PhotoOrganizer {
 
     private void ensure_directory (string path) throws Error {
         if (FileUtils.test (path, FileTest.IS_SYMLINK)) {
-            throw new IOError.FAILED ("Output path must not be a symbolic link: %s".printf (path));
+            throw new IOError.FAILED (_("Output path must not be a symbolic link: %s").printf (path));
         }
         if (FileUtils.test (path, FileTest.IS_DIR)) {
             return;
@@ -202,22 +202,22 @@ namespace PhotoOrganizer {
     public OrganizeResult organize (string source_path, ProgressCallback progress) throws Error {
         string? local_path = File.new_for_path (source_path).get_path ();
         if (local_path == null) {
-            throw new FileError.NOTDIR ("Selected folder must be a local directory.");
+            throw new FileError.NOTDIR (_("Selected folder must be a local directory."));
         }
         string source = local_path;
         if (!FileUtils.test (source, FileTest.IS_DIR)) {
-            throw new FileError.NOTDIR ("Selected folder does not exist: %s".printf (source));
+            throw new FileError.NOTDIR (_("Selected folder does not exist: %s").printf (source));
         }
 
         string output = Path.build_filename (source, "Organized Photos");
         if (FileUtils.test (output, FileTest.IS_SYMLINK)) {
-            throw new IOError.FAILED ("Output directory must not be a symbolic link: %s".printf (output));
+            throw new IOError.FAILED (_("Output directory must not be a symbolic link: %s").printf (output));
         }
         string canonical_output = File.new_for_path (output).get_path ();
 
         OrganizeResult result = new OrganizeResult ();
         ArrayList<PhotoFile> photos = new ArrayList<PhotoFile> ();
-        progress ("Scanning for photos…", 0, false);
+        progress (_("Scanning for photos…"), 0, false);
         scan_directory (source, canonical_output, photos, result.errors);
         photos.sort ((a, b) => {
             if (a.has_collision_suffix != b.has_collision_suffix) {
@@ -244,7 +244,7 @@ namespace PhotoOrganizer {
             try {
                 hash = sha256_file (photo.path);
             } catch (Error error) {
-                result.errors.add ("Could not read %s: %s".printf (photo.path, error.message));
+                result.errors.add (_("Could not read %s: %s").printf (photo.path, error.message));
                 hash = "unreadable:%s".printf (photo.path);
             }
             ArrayList<PhotoFile>? group = groups.get (hash);
@@ -256,7 +256,7 @@ namespace PhotoOrganizer {
 
             if ((i + 1) % hash_step == 0 || i + 1 == photos.size) {
                 progress (
-                    "Checking photos (%d of %d)…".printf (i + 1, photos.size),
+                    _("Checking photos (%d of %d)…").printf (i + 1, photos.size),
                     (i + 1) / photo_count * 0.5,
                     true
                 );
@@ -304,7 +304,7 @@ namespace PhotoOrganizer {
                 result.photos_moved++;
                 moved = true;
             } catch (Error error) {
-                result.errors.add ("Could not organize %s: %s".printf (photo.path, error.message));
+                result.errors.add (_("Could not organize %s: %s").printf (photo.path, error.message));
             }
 
             if (moved && destination != null && exif_timestamp != null) {
@@ -317,7 +317,7 @@ namespace PhotoOrganizer {
                     );
                 } catch (Error error) {
                     result.errors.add (
-                        "Moved %s but could not set its modification time: %s".printf (destination, error.message)
+                        _("Moved %s but could not set its modification time: %s").printf (destination, error.message)
                     );
                 }
 
@@ -335,7 +335,7 @@ namespace PhotoOrganizer {
                 } catch (Error error) {
                     result.creation_times_unavailable++;
                     result.errors.add (
-                        "Moved %s but could not set its creation time: %s".printf (destination, error.message)
+                        _("Moved %s but could not set its creation time: %s").printf (destination, error.message)
                     );
                 }
             }
@@ -343,7 +343,7 @@ namespace PhotoOrganizer {
             if ((i + 1) % move_step == 0 ||
                 i + 1 == photos_to_move.size) {
                 progress (
-                    "Organizing photos (%d of %d)…".printf (i + 1, photos_to_move.size),
+                    _("Organizing photos (%d of %d)…").printf (i + 1, photos_to_move.size),
                     0.5 + (i + 1) / photos_to_move_count * 0.5,
                     true
                 );

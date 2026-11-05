@@ -12,10 +12,15 @@ namespace PhotoOrganizer {
         private string? source_path;
 
         public MainWindow (Adw.Application application) {
-            Object (application: application, title: "Photo Organizer", default_width: 620, default_height: 420);
+            Object (
+                application: application,
+                title: _("Photo Organizer"),
+                default_width: 620,
+                default_height: 420
+            );
 
             Adw.HeaderBar header = new Adw.HeaderBar ();
-            Label title = new Label ("Photo Organizer");
+            Label title = new Label (_("Photo Organizer"));
             title.add_css_class ("title");
             header.set_title_widget (title);
             SimpleAction about_action = new SimpleAction ("about", null);
@@ -23,17 +28,17 @@ namespace PhotoOrganizer {
             add_action (about_action);
 
             GLib.Menu menu = new GLib.Menu ();
-            menu.append ("About Photo Organizer", "win.about");
+            menu.append (_("About Photo Organizer"), "win.about");
             MenuButton menu_button = new MenuButton () {
                 icon_name = "open-menu-symbolic",
-                tooltip_text = "Main Menu"
+                tooltip_text = _("Main Menu")
             };
             menu_button.set_menu_model (menu);
             header.pack_end (menu_button);
 
-            choose_button = new Button.with_label ("Choose Photo Folder…");
+            choose_button = new Button.with_label (_("Choose Photo Folder…"));
             choose_button.clicked.connect (choose_folder);
-            folder_label = new Label ("No folder selected") {
+            folder_label = new Label (_("No folder selected")) {
                 xalign = 0,
                 wrap = true,
                 selectable = true
@@ -43,7 +48,8 @@ namespace PhotoOrganizer {
             folder_row.append (folder_label);
 
             Label explanation = new Label (
-                "For exact duplicates, a name without a numbered suffix is preferred; otherwise the earliest-modified copy is moved into Organized Photos/YYYY/mm. Additional duplicates are counted and left where they are. When capture-date metadata is missing, the file’s modified date is used."
+                _("For exact duplicates, a name without a numbered suffix is preferred; otherwise the earliest-modified copy is moved into %s/YYYY/mm. Additional duplicates are counted and left where they are. When capture-date metadata is missing, the file’s modified date is used.")
+                    .printf ("Organized Photos")
             ) {
                 xalign = 0,
                 wrap = true
@@ -51,8 +57,8 @@ namespace PhotoOrganizer {
             explanation.add_css_class ("dim-label");
 
             progress_bar = new ProgressBar () { show_text = true, visible = false };
-            status_label = new Label ("Choose a folder to get started.") { xalign = 0, wrap = true };
-            organize_button = new Button.with_label ("Analyze and Organize");
+            status_label = new Label (_("Choose a folder to get started.")) { xalign = 0, wrap = true };
+            organize_button = new Button.with_label (_("Analyze and Organize"));
             organize_button.add_css_class ("suggested-action");
             organize_button.set_sensitive (false);
             organize_button.clicked.connect (start_organizing);
@@ -76,17 +82,15 @@ namespace PhotoOrganizer {
 
         private void show_about () {
             Adw.AboutDialog about = new Adw.AboutDialog ();
-            about.set_application_name ("Photo Organizer");
+            about.set_application_name (_("Photo Organizer"));
             about.set_version ("0.1.0");
-            about.set_developer_name ("Photo Organizer contributors");
-            about.set_comments (
-                "Organize photos by capture date and find exact duplicates."
-            );
+            about.set_developer_name (_("Photo Organizer contributors"));
+            about.set_comments (_("Organize photos by capture date and find exact duplicates."));
             about.present (this);
         }
 
         private void choose_folder () {
-            Gtk.FileDialog chooser = new Gtk.FileDialog () { title = "Choose Photo Folder" };
+            Gtk.FileDialog chooser = new Gtk.FileDialog () { title = _("Choose Photo Folder") };
             chooser.select_folder.begin (this, null, (object, response) => {
                 try {
                     GLib.File? selected = chooser.select_folder.end (response);
@@ -97,10 +101,10 @@ namespace PhotoOrganizer {
                     source_path = selected_path;
                     folder_label.set_text (selected_path);
                     organize_button.set_sensitive (true);
-                    status_label.set_text ("Ready to analyze the selected folder.");
+                    status_label.set_text (_("Ready to analyze the selected folder."));
                 } catch (Error error) {
                     if (!error.matches (IOError.quark (), IOError.CANCELLED)) {
-                        status_label.set_text ("Could not choose a folder: %s".printf (error.message));
+                        status_label.set_text (_("Could not choose a folder: %s").printf (error.message));
                     }
                 }
             });
@@ -114,7 +118,7 @@ namespace PhotoOrganizer {
             organize_button.set_sensitive (false);
             progress_bar.set_visible (true);
             progress_bar.set_fraction (0);
-            status_label.set_text ("Starting…");
+            status_label.set_text (_("Starting…"));
 
             string selected_path = source_path;
             new Thread<void*> ("organize-photos", () => {
@@ -124,7 +128,7 @@ namespace PhotoOrganizer {
                             status_label.set_text (message);
                             if (determinate) {
                                 progress_bar.set_fraction (fraction);
-                                progress_bar.set_text ("%.0f%%".printf (fraction * 100));
+                                progress_bar.set_text (_("%.0f%%").printf (fraction * 100));
                             } else {
                                 progress_bar.pulse ();
                             }
@@ -148,22 +152,35 @@ namespace PhotoOrganizer {
 
         private void show_result (OrganizeResult result) {
             string summary =
-                "Moved %u unique photo(s). Skipped %u duplicate file(s), leaving them in place. Used file dates for %u photo(s).".printf (
-                    result.photos_moved, result.duplicate_files, result.filesystem_dates
+                "%s %s %s".printf (
+                    ngettext ("Moved %u unique photo.", "Moved %u unique photos.", result.photos_moved)
+                        .printf (result.photos_moved),
+                    ngettext (
+                        "Skipped %u duplicate file, leaving it in place.",
+                        "Skipped %u duplicate files, leaving them in place.",
+                        result.duplicate_files
+                    ).printf (result.duplicate_files),
+                    ngettext (
+                        "Used the file date for %u photo.",
+                        "Used the file date for %u photos.",
+                        result.filesystem_dates
+                    ).printf (result.filesystem_dates)
                 );
             if (result.errors.size > 0) {
-                string details = "";
+                string[] details = {};
                 int message_count = result.errors.size < 3 ? result.errors.size : 3;
                 for (int i = 0; i < message_count; i++) {
-                    if (i > 0) {
-                        details += " ";
-                    }
                     details += result.errors[i];
                 }
-                summary += " %d issue(s): %s".printf (result.errors.size, details);
+                summary += " " + ngettext ("%u issue: %s", "%u issues: %s", result.errors.size)
+                    .printf (result.errors.size, string.joinv (" ", details));
             }
             if (result.creation_times_unavailable > 0) {
-                summary += " The file system did not allow setting the creation time for %u photo(s); modification times were set where possible.".printf (
+                summary += " " + ngettext (
+                    "The file system did not allow setting the creation time for %u photo; modification times were set where possible.",
+                    "The file system did not allow setting the creation time for %u photos; modification times were set where possible.",
+                    result.creation_times_unavailable
+                ).printf (
                     result.creation_times_unavailable
                 );
             }
@@ -172,7 +189,7 @@ namespace PhotoOrganizer {
         }
 
         private void show_failure (string message) {
-            status_label.set_text ("Could not organize photos: %s".printf (message));
+            status_label.set_text (_("Could not organize photos: %s").printf (message));
             finish ();
         }
 
@@ -180,7 +197,7 @@ namespace PhotoOrganizer {
             choose_button.set_sensitive (true);
             organize_button.set_sensitive (source_path != null);
             progress_bar.set_fraction (1);
-            progress_bar.set_text ("Complete");
+            progress_bar.set_text (_("Complete"));
         }
     }
 
@@ -202,6 +219,10 @@ namespace PhotoOrganizer {
     }
 
     public static int main (string[] args) {
+        Intl.setlocale (LocaleCategory.MESSAGES, "");
+        Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+        Intl.bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+        Intl.textdomain (GETTEXT_PACKAGE);
         Adw.init ();
         Application application = new Application ();
         return application.run (args);

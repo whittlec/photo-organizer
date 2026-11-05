@@ -34,3 +34,27 @@ To run the tests:
 ```sh
 meson test -C build --print-errorlogs
 ```
+
+## Translations
+
+The application uses GNU gettext. To update the translation template after
+changing user-visible strings:
+
+```sh
+ninja -C build photo-organizer-pot
+```
+
+To start a translation, create a PO file from `po/photo-organizer.pot`, add its
+locale code to `po/LINGUAS`, then reconfigure and rebuild so Meson includes
+the new catalog. For example:
+
+```sh
+msginit --input=po/photo-organizer.pot --locale=fr --output-file=po/fr.po
+echo fr >> po/LINGUAS
+meson setup build --reconfigure
+meson compile -C build
+```
+
+Use `ninja -C build photo-organizer-update-po` to refresh existing PO files
+after updating the template. The compiled catalogs are installed under
+`<localedir>/<locale>/LC_MESSAGES/photo-organizer.mo`.
