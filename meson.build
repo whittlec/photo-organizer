@@ -7,7 +7,7 @@ project(
 )
 
 gtk_dep = dependency('gtk4', version: '>= 4.12')
-adw_dep = dependency('libadwaita-1', version: '>= 1.4')
+adw_dep = dependency('libadwaita-1', version: '>= 1.5')
 gexiv2_dep = dependency('gexiv2', version: '>= 0.14')
 gee_dep = dependency('gee-0.8')
 

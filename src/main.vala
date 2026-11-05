@@ -18,6 +18,18 @@ namespace PhotoOrganizer {
             Label title = new Label ("Photo Organizer");
             title.add_css_class ("title");
             header.set_title_widget (title);
+            SimpleAction about_action = new SimpleAction ("about", null);
+            about_action.activate.connect (show_about);
+            add_action (about_action);
+
+            GLib.Menu menu = new GLib.Menu ();
+            menu.append ("About Photo Organizer", "win.about");
+            MenuButton menu_button = new MenuButton () {
+                icon_name = "open-menu-symbolic",
+                tooltip_text = "Main Menu"
+            };
+            menu_button.set_menu_model (menu);
+            header.pack_end (menu_button);
 
             choose_button = new Button.with_label ("Choose Photo Folder…");
             choose_button.clicked.connect (choose_folder);
@@ -60,6 +72,17 @@ namespace PhotoOrganizer {
             layout.add_top_bar (header);
             layout.set_content (content);
             set_content (layout);
+        }
+
+        private void show_about () {
+            Adw.AboutDialog about = new Adw.AboutDialog ();
+            about.set_application_name ("Photo Organizer");
+            about.set_version ("0.1.0");
+            about.set_developer_name ("Photo Organizer contributors");
+            about.set_comments (
+                "Organize photos by capture date and find exact duplicates."
+            );
+            about.present (this);
         }
 
         private void choose_folder () {
