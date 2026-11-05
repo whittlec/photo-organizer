@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: photo-organizer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 19:36+0000\n"
+"POT-Creation-Date: 2026-11-05 20:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,102 +18,98 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: src/main.vala:17 src/main.vala:23 src/main.vala:85
+#: src/main.vala:17 src/main.vala:24 src/main.vala:86
 msgid "Photo Organizer"
 msgstr ""
 
-#: src/main.vala:31
+#: src/main.vala:32
 msgid "About Photo Organizer"
 msgstr ""
 
-#: src/main.vala:34
+#: src/main.vala:35
 msgid "Main Menu"
 msgstr ""
 
-#: src/main.vala:39
+#: src/main.vala:40
 msgid "Choose Photo Folder…"
 msgstr ""
 
-#: src/main.vala:41
+#: src/main.vala:42
 msgid "No folder selected"
 msgstr ""
 
-#: src/main.vala:51
+#: src/main.vala:52
 #, c-format
 msgid ""
-"For exact duplicates, a name without a numbered suffix is preferred; "
-"otherwise the earliest-modified copy is moved into %s/YYYY/mm. Additional "
-"duplicates are counted and left where they are. When capture-date metadata "
-"is missing, the file’s modified date is used."
-msgstr ""
-
-#: src/main.vala:60
-msgid "Choose a folder to get started."
+"Unique photos are organized into YYYY/mm folders in the selected folder. For "
+"exact duplicates, a name without a numbered suffix is preferred; otherwise "
+"the earliest-modified copy is kept. Other duplicate photos are moved to %s. "
+"When capture-date metadata is missing, the file’s modified date is used."
 msgstr ""
 
 #: src/main.vala:61
+msgid "Choose a folder to get started."
+msgstr ""
+
+#: src/main.vala:62
 msgid "Analyze and Organize"
 msgstr ""
 
-#: src/main.vala:87
-msgid "Photo Organizer contributors"
-msgstr ""
-
-#: src/main.vala:88
+#: src/main.vala:90
 msgid "Organize photos by capture date and find exact duplicates."
 msgstr ""
 
-#: src/main.vala:93
+#: src/main.vala:97
 msgid "Choose Photo Folder"
 msgstr ""
 
-#: src/main.vala:104
+#: src/main.vala:112
 msgid "Ready to analyze the selected folder."
 msgstr ""
 
-#: src/main.vala:107
+#: src/main.vala:115
 #, c-format
 msgid "Could not choose a folder: %s"
 msgstr ""
 
-#: src/main.vala:121
+#: src/main.vala:129
 msgid "Starting…"
 msgstr ""
 
-#: src/main.vala:131
+#: src/main.vala:139
 #, c-format
 msgid "%.0f%%"
 msgstr ""
 
-#: src/main.vala:156
+#: src/main.vala:164
 #, c-format
 msgid "Moved %u unique photo."
 msgid_plural "Moved %u unique photos."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/main.vala:159
+#: src/main.vala:167
 #, c-format
-msgid "Skipped %u duplicate file, leaving it in place."
-msgid_plural "Skipped %u duplicate files, leaving them in place."
+msgid "Moved %u duplicate photo to Disorganized Photos."
+msgid_plural "Moved %u duplicate photos to Disorganized Photos."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/main.vala:164
+#: src/main.vala:172
 #, c-format
 msgid "Used the file date for %u photo."
 msgid_plural "Used the file date for %u photos."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/main.vala:175
+#: src/main.vala:183
 #, c-format
 msgid "%u issue: %s"
 msgid_plural "%u issues: %s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/main.vala:180
+#: src/main.vala:188
 #, c-format
 msgid ""
 "The file system did not allow setting the creation time for %u photo; "
@@ -124,74 +120,84 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/main.vala:192
+#: src/main.vala:200
 #, c-format
 msgid "Could not organize photos: %s"
 msgstr ""
 
-#: src/main.vala:200
+#: src/main.vala:208
 msgid "Complete"
 msgstr ""
 
-#: src/organizer.vala:106
+#: src/organizer.vala:119
 #, c-format
 msgid "Could not read modification time for %s: %s"
 msgstr ""
 
-#: src/organizer.vala:112
+#: src/organizer.vala:125
 #, c-format
 msgid "Could not scan %s: %s"
 msgstr ""
 
-#: src/organizer.vala:168
+#: src/organizer.vala:181
 #, c-format
 msgid "Output path must not be a symbolic link: %s"
 msgstr ""
 
-#: src/organizer.vala:205
+#: src/organizer.vala:218
 msgid "Selected folder must be a local directory."
 msgstr ""
 
-#: src/organizer.vala:209
+#: src/organizer.vala:222
 #, c-format
 msgid "Selected folder does not exist: %s"
 msgstr ""
 
-#: src/organizer.vala:214
+#: src/organizer.vala:227
 #, c-format
 msgid "Output directory must not be a symbolic link: %s"
 msgstr ""
 
-#: src/organizer.vala:220
+#: src/organizer.vala:233
 msgid "Scanning for photos…"
 msgstr ""
 
-#: src/organizer.vala:247
+#: src/organizer.vala:260
 #, c-format
 msgid "Could not read %s: %s"
 msgstr ""
 
-#: src/organizer.vala:259
+#: src/organizer.vala:272
 #, c-format
 msgid "Checking photos (%d of %d)…"
 msgstr ""
 
-#: src/organizer.vala:307
+#: src/organizer.vala:329
 #, c-format
 msgid "Could not organize %s: %s"
 msgstr ""
 
-#: src/organizer.vala:320
+#: src/organizer.vala:342
 #, c-format
 msgid "Moved %s but could not set its modification time: %s"
 msgstr ""
 
-#: src/organizer.vala:338
+#: src/organizer.vala:360
 #, c-format
 msgid "Moved %s but could not set its creation time: %s"
 msgstr ""
 
-#: src/organizer.vala:346
+#: src/organizer.vala:368
 #, c-format
 msgid "Organizing photos (%d of %d)…"
+msgstr ""
+
+#: src/organizer.vala:382
+#, c-format
+msgid "Could not move duplicate %s: %s"
+msgstr ""
+
+#: src/organizer.vala:388
+#, c-format
+msgid "Moving duplicate photos (%d of %d)…"
 msgstr ""

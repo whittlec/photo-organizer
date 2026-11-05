@@ -49,8 +49,8 @@ namespace PhotoOrganizer {
             folder_row.append (folder_label);
 
             Label explanation = new Label (
-                _("For exact duplicates, a name without a numbered suffix is preferred; otherwise the earliest-modified copy is moved into %s/YYYY/mm. Additional duplicates are counted and left where they are. When capture-date metadata is missing, the file’s modified date is used.")
-                    .printf ("Organized Photos")
+                _("Unique photos are organized into YYYY/mm folders in the selected folder. For exact duplicates, a name without a numbered suffix is preferred; otherwise the earliest-modified copy is kept. Other duplicate photos are moved to %s. When capture-date metadata is missing, the file’s modified date is used.")
+                    .printf ("Disorganized Photos")
             ) {
                 xalign = 0,
                 wrap = true
@@ -164,10 +164,10 @@ namespace PhotoOrganizer {
                     ngettext ("Moved %u unique photo.", "Moved %u unique photos.", result.photos_moved)
                         .printf (result.photos_moved),
                     ngettext (
-                        "Skipped %u duplicate file, leaving it in place.",
-                        "Skipped %u duplicate files, leaving them in place.",
-                        result.duplicate_files
-                    ).printf (result.duplicate_files),
+                        "Moved %u duplicate photo to Disorganized Photos.",
+                        "Moved %u duplicate photos to Disorganized Photos.",
+                        result.duplicate_files_moved
+                    ).printf (result.duplicate_files_moved),
                     ngettext (
                         "Used the file date for %u photo.",
                         "Used the file date for %u photos.",

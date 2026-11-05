@@ -5,6 +5,7 @@ namespace PhotoOrganizer {
     public class OrganizeResult : Object {
         public uint photos_moved { get; set; }
         public uint duplicate_files { get; set; }
+        public uint duplicate_files_moved { get; set; }
         public uint filesystem_dates { get; set; }
         public uint creation_times_unavailable { get; set; }
         public ArrayList<string> errors { get; private set; }
@@ -46,10 +47,12 @@ namespace PhotoOrganizer {
         public string path { get; private set; }
         public uint64 modified_time { get; private set; }
         public bool has_collision_suffix { get; private set; }
+        public bool already_organized { get; private set; }
 
-        public PhotoFile (string path, uint64 modified_time) {
+        public PhotoFile (string path, uint64 modified_time, bool already_organized) {
             this.path = path;
             this.modified_time = modified_time;
+            this.already_organized = already_organized;
             has_collision_suffix = PhotoOrganizer.has_collision_suffix (path);
         }
     }
@@ -74,14 +77,36 @@ namespace PhotoOrganizer {
         return false;
     }
 
+    private bool is_organized_photo (string path, string source_directory) {
+        string month_directory = Path.get_dirname (path);
+        string year_directory = Path.get_dirname (month_directory);
+        string month = Path.get_basename (month_directory);
+        string year = Path.get_basename (year_directory);
+        if (Path.get_dirname (year_directory) != source_directory ||
+            month.length != 2 || year.length != 4) {
+            return false;
+        }
+        for (int i = 0; i < year.length; i++) {
+            if (year[i] < '0' || year[i] > '9') {
+                return false;
+            }
+        }
+        if (month[0] < '0' || month[0] > '9' || month[1] < '0' || month[1] > '9') {
+            return false;
+        }
+        int month_number = int.parse (month);
+        return month_number >= 1 && month_number <= 12;
+    }
+
     private void scan_directory (
         string directory,
-        string output_directory,
+        string source_directory,
+        string disorganized_directory,
         ArrayList<PhotoFile> photos,
         ArrayList<string> errors
     ) {
         string canonical_directory = File.new_for_path (directory).get_path ();
-        if (canonical_directory == output_directory) {
+        if (canonical_directory == disorganized_directory) {
             return;
         }
 
@@ -95,16 +120,20 @@ namespace PhotoOrganizer {
                 }
 
                 if (FileUtils.test (path, FileTest.IS_DIR)) {
-                    scan_directory (path, output_directory, photos, errors);
+                    scan_directory (path, source_directory, disorganized_directory, photos, errors);
                 } else if (is_photo (path) && FileUtils.test (path, FileTest.IS_REGULAR)) {
                     try {
                         FileInfo info = File.new_for_path (path).query_info (
                             "time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS
                         );
-                        photos.add (new PhotoFile (path, info.get_attribute_uint64 ("time::modified")));
+                        photos.add (new PhotoFile (
+                            path,
+                            info.get_attribute_uint64 ("time::modified"),
+                            is_organized_photo (path, source_directory)
+                        ));
                     } catch (Error error) {
                         errors.add (_("Could not read modification time for %s: %s").printf (path, error.message));
-                        photos.add (new PhotoFile (path, uint64.MAX));
+                        photos.add (new PhotoFile (path, uint64.MAX, is_organized_photo (path, source_directory)));
                     }
                 }
             }
@@ -209,17 +238,20 @@ namespace PhotoOrganizer {
             throw new FileError.NOTDIR (_("Selected folder does not exist: %s").printf (source));
         }
 
-        string output = Path.build_filename (source, "Organized Photos");
-        if (FileUtils.test (output, FileTest.IS_SYMLINK)) {
-            throw new IOError.FAILED (_("Output directory must not be a symbolic link: %s").printf (output));
+        string disorganized = Path.build_filename (source, "Disorganized Photos");
+        if (FileUtils.test (disorganized, FileTest.IS_SYMLINK)) {
+            throw new IOError.FAILED (_("Output directory must not be a symbolic link: %s").printf (disorganized));
         }
-        string canonical_output = File.new_for_path (output).get_path ();
+        string canonical_disorganized = File.new_for_path (disorganized).get_path ();
 
         OrganizeResult result = new OrganizeResult ();
         ArrayList<PhotoFile> photos = new ArrayList<PhotoFile> ();
         progress (_("Scanning for photos…"), 0, false);
-        scan_directory (source, canonical_output, photos, result.errors);
+        scan_directory (source, source, canonical_disorganized, photos, result.errors);
         photos.sort ((a, b) => {
+            if (a.already_organized != b.already_organized) {
+                return a.already_organized ? -1 : 1;
+            }
             if (a.has_collision_suffix != b.has_collision_suffix) {
                 return a.has_collision_suffix ? 1 : -1;
             }
@@ -264,21 +296,36 @@ namespace PhotoOrganizer {
         }
 
         ArrayList<PhotoFile> photos_to_move = new ArrayList<PhotoFile> ();
+        ArrayList<PhotoFile> duplicates_to_move = new ArrayList<PhotoFile> ();
         foreach (Map.Entry<string, ArrayList<PhotoFile>> entry in groups.entries) {
             ArrayList<PhotoFile> group = entry.value;
             if (group.size > 1) {
                 result.duplicate_files += group.size - 1;
             }
-            photos_to_move.add (group[0]);
+            if (group[0].already_organized) {
+                for (int i = 1; i < group.size; i++) {
+                    duplicates_to_move.add (group[i]);
+                }
+            } else {
+                photos_to_move.add (group[0]);
+                for (int i = 1; i < group.size; i++) {
+                    duplicates_to_move.add (group[i]);
+                }
+            }
         }
 
-        ensure_directory (output);
+        if (duplicates_to_move.size > 0) {
+            ensure_directory (disorganized);
+        }
 
         int move_step = photos_to_move.size / 100;
         if (move_step < 1) {
             move_step = 1;
         }
-        double photos_to_move_count = photos_to_move.size > 0 ? photos_to_move.size : 1;
+        double all_moves_count = photos_to_move.size + duplicates_to_move.size;
+        if (all_moves_count < 1) {
+            all_moves_count = 1;
+        }
         for (int i = 0; i < photos_to_move.size; i++) {
             PhotoFile photo = photos_to_move[i];
             string? destination = null;
@@ -295,7 +342,7 @@ namespace PhotoOrganizer {
                     captured = new DateTime.from_unix_local ((int64) info.get_attribute_uint64 ("time::modified"));
                     result.filesystem_dates++;
                 }
-                string year_directory = Path.build_filename (output, captured.format ("%Y"));
+                string year_directory = Path.build_filename (source, captured.format ("%Y"));
                 ensure_directory (year_directory);
                 string month_directory = Path.build_filename (year_directory, captured.format ("%m"));
                 ensure_directory (month_directory);
@@ -343,8 +390,28 @@ namespace PhotoOrganizer {
             if ((i + 1) % move_step == 0 ||
                 i + 1 == photos_to_move.size) {
                 progress (
-                    _("Organizing photos (%d of %d)…").printf (i + 1, photos_to_move.size),
-                    0.5 + (i + 1) / photos_to_move_count * 0.5,
+                    _("Organizing photos (%d of %d)…").printf (i + 1, (int) all_moves_count),
+                    0.5 + (i + 1) / all_moves_count * 0.5,
+                    true
+                );
+            }
+        }
+
+        for (int i = 0; i < duplicates_to_move.size; i++) {
+            PhotoFile duplicate = duplicates_to_move[i];
+            try {
+                string destination = unused_destination (disorganized, Path.get_basename (duplicate.path));
+                File.new_for_path (duplicate.path).move (File.new_for_path (destination), FileCopyFlags.NONE);
+                result.duplicate_files_moved++;
+            } catch (Error error) {
+                result.errors.add (_("Could not move duplicate %s: %s").printf (duplicate.path, error.message));
+            }
+
+            if ((i + 1) % move_step == 0 || i + 1 == duplicates_to_move.size) {
+                int completed_moves = photos_to_move.size + i + 1;
+                progress (
+                    _("Moving duplicate photos (%d of %d)…").printf (completed_moves, (int) all_moves_count),
+                    0.5 + completed_moves / all_moves_count * 0.5,
                     true
                 );
             }
