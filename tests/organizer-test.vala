@@ -25,6 +25,18 @@ namespace PhotoOrganizer.Tests {
         }
     }
 
+    private uint64 get_modified_time (string path) {
+        try {
+            FileInfo info = File.new_for_path (path).query_info (
+                "time::modified", FileQueryInfoFlags.NONE
+            );
+            return info.get_attribute_uint64 ("time::modified");
+        } catch (Error error) {
+            Test.fail_printf ("Could not read test modification time: %s", error.message);
+            return 0;
+        }
+    }
+
     private void write_photo_with_exif (string path) {
         try {
             Gdk.Pixbuf image = new Gdk.Pixbuf (Gdk.Colorspace.RGB, false, 8, 2, 2);
@@ -155,6 +167,10 @@ namespace PhotoOrganizer.Tests {
         GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
         GLib.assert_cmpuint (result.filesystem_dates, CompareOperator.EQ, 0);
         GLib.assert_true (FileUtils.test (organized_photo, FileTest.EXISTS));
+        GLib.assert_true (
+            get_modified_time (organized_photo) ==
+            (uint64) new DateTime.local (2020, 3, 4, 5, 6, 7).to_unix ()
+        );
         remove_tree (temporary);
     }
 

@@ -162,6 +162,11 @@ namespace PhotoOrganizer {
                 }
                 summary += " %d issue(s): %s".printf (result.errors.size, details);
             }
+            if (result.creation_times_unavailable > 0) {
+                summary += " The file system did not allow setting the creation time for %u photo(s); modification times were set where possible.".printf (
+                    result.creation_times_unavailable
+                );
+            }
             status_label.set_text (summary);
             finish ();
         }

@@ -6,6 +6,7 @@ namespace PhotoOrganizer {
         public uint photos_moved { get; set; }
         public uint duplicate_files { get; set; }
         public uint filesystem_dates { get; set; }
+        public uint creation_times_unavailable { get; set; }
         public ArrayList<string> errors { get; private set; }
 
         public OrganizeResult () {
@@ -280,9 +281,14 @@ namespace PhotoOrganizer {
         double photos_to_move_count = photos_to_move.size > 0 ? photos_to_move.size : 1;
         for (int i = 0; i < photos_to_move.size; i++) {
             PhotoFile photo = photos_to_move[i];
+            string? destination = null;
+            int64? exif_timestamp = null;
+            bool moved = false;
             try {
                 DateTime? captured = exif_capture_time (photo.path);
-                if (captured == null) {
+                if (captured != null) {
+                    exif_timestamp = captured.to_unix ();
+                } else {
                     FileInfo info = File.new_for_path (photo.path).query_info (
                         "time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS
                     );
@@ -293,11 +299,45 @@ namespace PhotoOrganizer {
                 ensure_directory (year_directory);
                 string month_directory = Path.build_filename (year_directory, captured.format ("%m"));
                 ensure_directory (month_directory);
-                string destination = unused_destination (month_directory, Path.get_basename (photo.path));
+                destination = unused_destination (month_directory, Path.get_basename (photo.path));
                 File.new_for_path (photo.path).move (File.new_for_path (destination), FileCopyFlags.NONE);
                 result.photos_moved++;
+                moved = true;
             } catch (Error error) {
                 result.errors.add ("Could not organize %s: %s".printf (photo.path, error.message));
+            }
+
+            if (moved && destination != null && exif_timestamp != null) {
+                File organized_photo = File.new_for_path (destination);
+                try {
+                    organized_photo.set_attribute_uint64 (
+                        "time::modified",
+                        (uint64) exif_timestamp,
+                        FileQueryInfoFlags.NONE
+                    );
+                } catch (Error error) {
+                    result.errors.add (
+                        "Moved %s but could not set its modification time: %s".printf (destination, error.message)
+                    );
+                }
+
+                try {
+                    FileAttributeInfoList settable = organized_photo.query_settable_attributes ();
+                    if (settable.lookup ("time::created") == null) {
+                        result.creation_times_unavailable++;
+                    } else {
+                        organized_photo.set_attribute_uint64 (
+                            "time::created",
+                            (uint64) exif_timestamp,
+                            FileQueryInfoFlags.NONE
+                        );
+                    }
+                } catch (Error error) {
+                    result.creation_times_unavailable++;
+                    result.errors.add (
+                        "Moved %s but could not set its creation time: %s".printf (destination, error.message)
+                    );
+                }
             }
 
             if ((i + 1) % move_step == 0 ||

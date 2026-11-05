@@ -9,7 +9,10 @@ have the same suffix status, the file with the earliest filesystem
 modification time is chosen. Other copies are counted and left at their
 original locations. This selection uses filesystem modification times, not
 EXIF dates. If capture-date metadata is unavailable, the selected file's
-last-modified date is used.
+last-modified date is used. When EXIF capture time is available, the app also
+sets the organized file's modification time to that timestamp. It sets the
+filesystem creation time only on filesystems that allow changing it; most
+Linux filesystems do not, and the app reports when that is unavailable.
 
 Files with the same name receive a numbered suffix rather than being
 overwritten. The existing `Organized Photos` directory is excluded from
