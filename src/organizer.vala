@@ -102,11 +102,13 @@ namespace PhotoOrganizer {
         string directory,
         string source_directory,
         string disorganized_directory,
+        string? wallpaper_directory,
         ArrayList<PhotoFile> photos,
         ArrayList<string> errors
     ) {
         string canonical_directory = File.new_for_path (directory).get_path ();
-        if (canonical_directory == disorganized_directory) {
+        if (canonical_directory == disorganized_directory ||
+            (wallpaper_directory != null && canonical_directory == wallpaper_directory)) {
             return;
         }
 
@@ -120,7 +122,14 @@ namespace PhotoOrganizer {
                 }
 
                 if (FileUtils.test (path, FileTest.IS_DIR)) {
-                    scan_directory (path, source_directory, disorganized_directory, photos, errors);
+                    scan_directory (
+                        path,
+                        source_directory,
+                        disorganized_directory,
+                        wallpaper_directory,
+                        photos,
+                        errors
+                    );
                 } else if (is_photo (path) && FileUtils.test (path, FileTest.IS_REGULAR)) {
                     try {
                         FileInfo info = File.new_for_path (path).query_info (
@@ -228,7 +237,93 @@ namespace PhotoOrganizer {
         return destination;
     }
 
-    public OrganizeResult organize (string source_path, ProgressCallback progress) throws Error {
+    private SettingsSchema? wallpaper_slideshow_schema_in (string data_directory) {
+        const string schema_id = "org.gnome.shell.extensions.azwallpaper";
+        const string extension_id = "azwallpaper@azwallpaper.gitlab.com";
+        SettingsSchemaSource? default_source = SettingsSchemaSource.get_default ();
+        string schema_directory = Path.build_filename (
+            data_directory,
+            "gnome-shell",
+            "extensions",
+            extension_id,
+            "schemas"
+        );
+        string compiled_schema = Path.build_filename (schema_directory, "gschemas.compiled");
+        if (!FileUtils.test (compiled_schema, FileTest.IS_REGULAR)) {
+            return null;
+        }
+
+        try {
+            SettingsSchemaSource extension_source = new SettingsSchemaSource.from_directory (
+                schema_directory,
+                default_source,
+                true
+            );
+            return extension_source.lookup (schema_id, true);
+        } catch (Error error) {
+            warning ("Could not load Wallpaper Slideshow settings from %s: %s"
+                .printf (schema_directory, error.message));
+            return null;
+        }
+    }
+
+    private SettingsSchema? wallpaper_slideshow_schema () {
+        const string schema_id = "org.gnome.shell.extensions.azwallpaper";
+        SettingsSchemaSource? default_source = SettingsSchemaSource.get_default ();
+        SettingsSchema? schema = default_source == null
+            ? null
+            : default_source.lookup (schema_id, true);
+        if (schema != null) {
+            return schema;
+        }
+
+        schema = wallpaper_slideshow_schema_in (Environment.get_user_data_dir ());
+        if (schema != null) {
+            return schema;
+        }
+
+        string? configured_data_directories = Environment.get_variable ("XDG_DATA_DIRS");
+        string[] system_data_directories;
+        if (configured_data_directories == null || configured_data_directories.length == 0) {
+            system_data_directories = { "/usr/local/share", "/usr/share" };
+        } else {
+            system_data_directories = configured_data_directories.split (":");
+        }
+        foreach (string data_directory in system_data_directories) {
+            if (data_directory.length == 0) {
+                continue;
+            }
+            schema = wallpaper_slideshow_schema_in (data_directory);
+            if (schema != null) {
+                return schema;
+            }
+        }
+        return null;
+    }
+
+    private string? wallpaper_slideshow_directory () {
+        SettingsSchema? schema = wallpaper_slideshow_schema ();
+        if (schema == null || !schema.has_key ("slideshow-directory")) {
+            return null;
+        }
+
+        Settings settings = new Settings.full (schema, null, null);
+        string path = settings.get_string ("slideshow-directory");
+        if (path.length == 0) {
+            return null;
+        }
+        string? canonical_path = File.new_for_path (path).get_path ();
+        if (canonical_path != null) {
+            debug ("Excluding Wallpaper Slideshow directory: %s", canonical_path);
+        }
+        return canonical_path;
+    }
+
+    public OrganizeResult organize (
+        string source_path,
+        ProgressCallback progress,
+        string? protected_wallpaper_directory = null
+    ) throws Error {
         string? local_path = File.new_for_path (source_path).get_path ();
         if (local_path == null) {
             throw new FileError.NOTDIR (_("Selected folder must be a local directory."));
@@ -238,6 +333,9 @@ namespace PhotoOrganizer {
             throw new FileError.NOTDIR (_("Selected folder does not exist: %s").printf (source));
         }
 
+        string? wallpaper_directory = protected_wallpaper_directory != null
+            ? File.new_for_path (protected_wallpaper_directory).get_path ()
+            : wallpaper_slideshow_directory ();
         string disorganized = Path.build_filename (source, "Disorganized Photos");
         if (FileUtils.test (disorganized, FileTest.IS_SYMLINK)) {
             throw new IOError.FAILED (_("Output directory must not be a symbolic link: %s").printf (disorganized));
@@ -247,7 +345,14 @@ namespace PhotoOrganizer {
         OrganizeResult result = new OrganizeResult ();
         ArrayList<PhotoFile> photos = new ArrayList<PhotoFile> ();
         progress (_("Scanning for photos…"), 0, false);
-        scan_directory (source, source, canonical_disorganized, photos, result.errors);
+        scan_directory (
+            source,
+            source,
+            canonical_disorganized,
+            wallpaper_directory,
+            photos,
+            result.errors
+        );
         photos.sort ((a, b) => {
             if (a.already_organized != b.already_organized) {
                 return a.already_organized ? -1 : 1;

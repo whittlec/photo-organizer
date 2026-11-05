@@ -19,6 +19,8 @@ overwritten. Existing `YYYY/mm` photos are included when checking for
 duplicates but are not moved again. The `Disorganized Photos` folder is
 excluded from subsequent scans. Photos from a previous `Organized Photos`
 output folder are moved into the new in-place date structure.
+When the GNOME Wallpaper Slideshow extension is installed, its configured
+slideshow directory is excluded from scanning and left untouched.
 
 ## Install and run
 

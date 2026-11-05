@@ -51,9 +51,9 @@ namespace PhotoOrganizer.Tests {
         }
     }
 
-    private OrganizeResult organize_temporary_directory (string path) {
+    private OrganizeResult organize_temporary_directory (string path, string? protected_wallpaper_directory = null) {
         try {
-            return organize (path, (message, fraction, determinate) => {});
+            return organize (path, (message, fraction, determinate) => {}, protected_wallpaper_directory);
         } catch (Error error) {
             Test.fail_printf ("Could not organize test directory: %s", error.message);
             return new OrganizeResult ();
@@ -249,6 +249,29 @@ namespace PhotoOrganizer.Tests {
         remove_tree (temporary);
     }
 
+    private void test_leaves_wallpaper_slideshow_directory_alone () {
+        string temporary = make_temporary_directory ();
+        string wallpaper_directory = Path.build_filename (temporary, "wallpaper-slideshow");
+        DirUtils.create (wallpaper_directory, 0755);
+        string wallpaper = Path.build_filename (wallpaper_directory, "wallpaper.jpg");
+        write_file (wallpaper, "wallpaper image");
+        string regular_photo = Path.build_filename (temporary, "photo.jpg");
+        write_file (regular_photo, "photo to organize");
+        DateTime captured = new DateTime.from_unix_local ((int64) get_modified_time (regular_photo));
+        string organized_photo = Path.build_filename (
+            temporary, captured.format ("%Y"), captured.format ("%m"), "photo.jpg"
+        );
+
+        OrganizeResult result = organize_temporary_directory (temporary, wallpaper_directory);
+
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
+        GLib.assert_true (FileUtils.test (wallpaper, FileTest.EXISTS));
+        GLib.assert_false (FileUtils.test (regular_photo, FileTest.EXISTS));
+        GLib.assert_true (FileUtils.test (organized_photo, FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
     public static int main (string[] args) {
         Test.init (ref args);
         Test.add_func ("/organizer/organizes-one-copy-and-moves-duplicates-aside", test_organizes_one_copy_and_moves_duplicates_aside);
@@ -259,6 +282,7 @@ namespace PhotoOrganizer.Tests {
         Test.add_func ("/organizer/existing-organized-photo-wins", test_existing_organized_photo_wins_over_new_duplicate);
         Test.add_func ("/organizer/moves-legacy-organized-photos", test_moves_photos_from_legacy_organized_folder);
         Test.add_func ("/organizer/scans-unorganized-year-folder", test_scans_year_named_input_folder_without_month_folders);
+        Test.add_func ("/organizer/leaves-wallpaper-slideshow-directory-alone", test_leaves_wallpaper_slideshow_directory_alone);
         return Test.run ();
     }
 }
