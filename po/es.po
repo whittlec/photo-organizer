@@ -1,0 +1,200 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: photo-organizer 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-05 19:36+0000\n"
+"PO-Revision-Date: 2026-11-05 19:42+0000\n"
+"Last-Translator: Spanish translation team\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/main.vala:17 src/main.vala:23 src/main.vala:85
+msgid "Photo Organizer"
+msgstr "Organizador de fotos"
+
+#: src/main.vala:31
+msgid "About Photo Organizer"
+msgstr "Acerca del organizador de fotos"
+
+#: src/main.vala:34
+msgid "Main Menu"
+msgstr "Menú principal"
+
+#: src/main.vala:39
+msgid "Choose Photo Folder…"
+msgstr "Elegir carpeta de fotos…"
+
+#: src/main.vala:41
+msgid "No folder selected"
+msgstr "No hay ninguna carpeta seleccionada"
+
+#: src/main.vala:51
+#, c-format
+msgid ""
+"For exact duplicates, a name without a numbered suffix is preferred; "
+"otherwise the earliest-modified copy is moved into %s/YYYY/mm. Additional "
+"duplicates are counted and left where they are. When capture-date metadata "
+"is missing, the file’s modified date is used."
+msgstr ""
+"Para los duplicados exactos, se prefiere un nombre sin sufijo numérico; de "
+"lo contrario, se mueve a %s/YYYY/mm la copia con la fecha de modificación "
+"más antigua. Los demás duplicados se contabilizan y se dejan donde están. "
+"Si faltan los metadatos de la fecha de captura, se usa la fecha de "
+"modificación del archivo."
+
+#: src/main.vala:60
+msgid "Choose a folder to get started."
+msgstr "Elige una carpeta para empezar."
+
+#: src/main.vala:61
+msgid "Analyze and Organize"
+msgstr "Analizar y organizar"
+
+#: src/main.vala:87
+msgid "Photo Organizer contributors"
+msgstr "Colaboradores del organizador de fotos"
+
+#: src/main.vala:88
+msgid "Organize photos by capture date and find exact duplicates."
+msgstr "Organiza las fotos por fecha de captura y busca duplicados exactos."
+
+#: src/main.vala:93
+msgid "Choose Photo Folder"
+msgstr "Elegir carpeta de fotos"
+
+#: src/main.vala:104
+msgid "Ready to analyze the selected folder."
+msgstr "La carpeta seleccionada está lista para analizarse."
+
+#: src/main.vala:107
+#, c-format
+msgid "Could not choose a folder: %s"
+msgstr "No se pudo elegir una carpeta: %s"
+
+#: src/main.vala:121
+msgid "Starting…"
+msgstr "Iniciando…"
+
+#: src/main.vala:131
+#, c-format
+msgid "%.0f%%"
+msgstr "%.0f%%"
+
+#: src/main.vala:156
+#, c-format
+msgid "Moved %u unique photo."
+msgid_plural "Moved %u unique photos."
+msgstr[0] "Se movió %u foto única."
+msgstr[1] "Se movieron %u fotos únicas."
+
+#: src/main.vala:159
+#, c-format
+msgid "Skipped %u duplicate file, leaving it in place."
+msgid_plural "Skipped %u duplicate files, leaving them in place."
+msgstr[0] "Se omitió %u archivo duplicado y se dejó en su sitio."
+msgstr[1] "Se omitieron %u archivos duplicados y se dejaron en su sitio."
+
+#: src/main.vala:164
+#, c-format
+msgid "Used the file date for %u photo."
+msgid_plural "Used the file date for %u photos."
+msgstr[0] "Se usó la fecha del archivo para %u foto."
+msgstr[1] "Se usó la fecha del archivo para %u fotos."
+
+#: src/main.vala:175
+#, c-format
+msgid "%u issue: %s"
+msgid_plural "%u issues: %s"
+msgstr[0] "%u problema: %s"
+msgstr[1] "%u problemas: %s"
+
+#: src/main.vala:180
+#, c-format
+msgid ""
+"The file system did not allow setting the creation time for %u photo; "
+"modification times were set where possible."
+msgid_plural ""
+"The file system did not allow setting the creation time for %u photos; "
+"modification times were set where possible."
+msgstr[0] ""
+"El sistema de archivos no permitió establecer la fecha de creación de %u "
+"foto; se establecieron las fechas de modificación cuando fue posible."
+msgstr[1] ""
+"El sistema de archivos no permitió establecer la fecha de creación de %u "
+"fotos; se establecieron las fechas de modificación cuando fue posible."
+
+#: src/main.vala:192
+#, c-format
+msgid "Could not organize photos: %s"
+msgstr "No se pudieron organizar las fotos: %s"
+
+#: src/main.vala:200
+msgid "Complete"
+msgstr "Completado"
+
+#: src/organizer.vala:106
+#, c-format
+msgid "Could not read modification time for %s: %s"
+msgstr "No se pudo leer la fecha de modificación de %s: %s"
+
+#: src/organizer.vala:112
+#, c-format
+msgid "Could not scan %s: %s"
+msgstr "No se pudo analizar %s: %s"
+
+#: src/organizer.vala:168
+#, c-format
+msgid "Output path must not be a symbolic link: %s"
+msgstr "La ruta de salida no debe ser un enlace simbólico: %s"
+
+#: src/organizer.vala:205
+msgid "Selected folder must be a local directory."
+msgstr "La carpeta seleccionada debe ser un directorio local."
+
+#: src/organizer.vala:209
+#, c-format
+msgid "Selected folder does not exist: %s"
+msgstr "La carpeta seleccionada no existe: %s"
+
+#: src/organizer.vala:214
+#, c-format
+msgid "Output directory must not be a symbolic link: %s"
+msgstr "El directorio de salida no debe ser un enlace simbólico: %s"
+
+#: src/organizer.vala:220
+msgid "Scanning for photos…"
+msgstr "Buscando fotos…"
+
+#: src/organizer.vala:247
+#, c-format
+msgid "Could not read %s: %s"
+msgstr "No se pudo leer %s: %s"
+
+#: src/organizer.vala:259
+#, c-format
+msgid "Checking photos (%d of %d)…"
+msgstr "Comprobando fotos (%d de %d)…"
+
+#: src/organizer.vala:307
+#, c-format
+msgid "Could not organize %s: %s"
+msgstr "No se pudo organizar %s: %s"
+
+#: src/organizer.vala:320
+#, c-format
+msgid "Moved %s but could not set its modification time: %s"
+msgstr "Se movió %s, pero no se pudo establecer su fecha de modificación: %s"
+
+#: src/organizer.vala:338
+#, c-format
+msgid "Moved %s but could not set its creation time: %s"
+msgstr "Se movió %s, pero no se pudo establecer su fecha de creación: %s"
+
+#: src/organizer.vala:346
+#, c-format
+msgid "Organizing photos (%d of %d)…"
+msgstr "Organizando fotos (%d de %d)…"

@@ -1,0 +1,192 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: photo-organizer 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-05 19:36+0000\n"
+"PO-Revision-Date: 2026-11-05 19:44+0000\n"
+"Last-Translator: Japanese translation team\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: src/main.vala:17 src/main.vala:23 src/main.vala:85
+msgid "Photo Organizer"
+msgstr "写真整理ツール"
+
+#: src/main.vala:31
+msgid "About Photo Organizer"
+msgstr "写真整理ツールについて"
+
+#: src/main.vala:34
+msgid "Main Menu"
+msgstr "メインメニュー"
+
+#: src/main.vala:39
+msgid "Choose Photo Folder…"
+msgstr "写真フォルダーを選択…"
+
+#: src/main.vala:41
+msgid "No folder selected"
+msgstr "フォルダーが選択されていません"
+
+#: src/main.vala:51
+#, c-format
+msgid ""
+"For exact duplicates, a name without a numbered suffix is preferred; "
+"otherwise the earliest-modified copy is moved into %s/YYYY/mm. Additional "
+"duplicates are counted and left where they are. When capture-date metadata "
+"is missing, the file’s modified date is used."
+msgstr ""
+"完全に同一のファイルが複数ある場合は、番号付きの接尾辞がない名前のファイルを"
+"優先します。それ以外の場合は、更新日時が最も古いファイルを%s/YYYY/mmに移動"
+"します。その他の重複ファイルは数に含めますが、元の場所に残します。撮影日の"
+"メタデータがない場合は、ファイルの更新日を使用します。"
+
+#: src/main.vala:60
+msgid "Choose a folder to get started."
+msgstr "開始するにはフォルダーを選択してください。"
+
+#: src/main.vala:61
+msgid "Analyze and Organize"
+msgstr "分析して整理"
+
+#: src/main.vala:87
+msgid "Photo Organizer contributors"
+msgstr "写真整理ツールの貢献者"
+
+#: src/main.vala:88
+msgid "Organize photos by capture date and find exact duplicates."
+msgstr "撮影日ごとに写真を整理し、完全に同一のファイルを検出します。"
+
+#: src/main.vala:93
+msgid "Choose Photo Folder"
+msgstr "写真フォルダーを選択"
+
+#: src/main.vala:104
+msgid "Ready to analyze the selected folder."
+msgstr "選択したフォルダーを分析する準備ができました。"
+
+#: src/main.vala:107
+#, c-format
+msgid "Could not choose a folder: %s"
+msgstr "フォルダーを選択できませんでした: %s"
+
+#: src/main.vala:121
+msgid "Starting…"
+msgstr "開始しています…"
+
+#: src/main.vala:131
+#, c-format
+msgid "%.0f%%"
+msgstr "%.0f%%"
+
+#: src/main.vala:156
+#, c-format
+msgid "Moved %u unique photo."
+msgid_plural "Moved %u unique photos."
+msgstr[0] "重複のない写真を%u枚移動しました。"
+
+#: src/main.vala:159
+#, c-format
+msgid "Skipped %u duplicate file, leaving it in place."
+msgid_plural "Skipped %u duplicate files, leaving them in place."
+msgstr[0] "重複ファイルを%u個スキップし、元の場所に残しました。"
+
+#: src/main.vala:164
+#, c-format
+msgid "Used the file date for %u photo."
+msgid_plural "Used the file date for %u photos."
+msgstr[0] "%u枚の写真にファイルの日付を使用しました。"
+
+#: src/main.vala:175
+#, c-format
+msgid "%u issue: %s"
+msgid_plural "%u issues: %s"
+msgstr[0] "%u件の問題: %s"
+
+#: src/main.vala:180
+#, c-format
+msgid ""
+"The file system did not allow setting the creation time for %u photo; "
+"modification times were set where possible."
+msgid_plural ""
+"The file system did not allow setting the creation time for %u photos; "
+"modification times were set where possible."
+msgstr[0] ""
+"ファイルシステムが写真%u枚の作成日時の設定を許可しませんでした。可能な場合は"
+"更新日時を設定しました。"
+
+#: src/main.vala:192
+#, c-format
+msgid "Could not organize photos: %s"
+msgstr "写真を整理できませんでした: %s"
+
+#: src/main.vala:200
+msgid "Complete"
+msgstr "完了"
+
+#: src/organizer.vala:106
+#, c-format
+msgid "Could not read modification time for %s: %s"
+msgstr "%sの更新日時を読み取れませんでした: %s"
+
+#: src/organizer.vala:112
+#, c-format
+msgid "Could not scan %s: %s"
+msgstr "%sをスキャンできませんでした: %s"
+
+#: src/organizer.vala:168
+#, c-format
+msgid "Output path must not be a symbolic link: %s"
+msgstr "出力パスにシンボリックリンクは指定できません: %s"
+
+#: src/organizer.vala:205
+msgid "Selected folder must be a local directory."
+msgstr "選択したフォルダーはローカルディレクトリーである必要があります。"
+
+#: src/organizer.vala:209
+#, c-format
+msgid "Selected folder does not exist: %s"
+msgstr "選択したフォルダーは存在しません: %s"
+
+#: src/organizer.vala:214
+#, c-format
+msgid "Output directory must not be a symbolic link: %s"
+msgstr "出力ディレクトリーにシンボリックリンクは指定できません: %s"
+
+#: src/organizer.vala:220
+msgid "Scanning for photos…"
+msgstr "写真を検索しています…"
+
+#: src/organizer.vala:247
+#, c-format
+msgid "Could not read %s: %s"
+msgstr "%sを読み取れませんでした: %s"
+
+#: src/organizer.vala:259
+#, c-format
+msgid "Checking photos (%d of %d)…"
+msgstr "写真を確認しています（%d/%d）…"
+
+#: src/organizer.vala:307
+#, c-format
+msgid "Could not organize %s: %s"
+msgstr "%sを整理できませんでした: %s"
+
+#: src/organizer.vala:320
+#, c-format
+msgid "Moved %s but could not set its modification time: %s"
+msgstr "%sを移動しましたが、更新日時を設定できませんでした: %s"
+
+#: src/organizer.vala:338
+#, c-format
+msgid "Moved %s but could not set its creation time: %s"
+msgstr "%sを移動しましたが、作成日時を設定できませんでした: %s"
+
+#: src/organizer.vala:346
+#, c-format
+msgid "Organizing photos (%d of %d)…"
+msgstr "写真を整理しています（%d/%d）…"

@@ -44,10 +44,12 @@ changing user-visible strings:
 ninja -C build photo-organizer-pot
 ```
 
-The `en_GB` catalogue provides British English wording. To start another
-translation, create a PO file from `po/photo-organizer.pot`, add its locale
-code to `po/LINGUAS`, then reconfigure and rebuild so Meson includes the new
-catalogue. For example:
+The available catalogues provide British English (`en_GB`), German (`de`),
+French (`fr`), Spanish (`es`), Welsh (`cy`), Italian (`it`), Dutch (`nl`),
+and Japanese (`ja`).
+To start another translation, create a PO file from `po/photo-organizer.pot`,
+add its locale code to `po/LINGUAS`, then reconfigure and rebuild so Meson
+includes the new catalogue. For example:
 
 ```sh
 msginit --input=po/photo-organizer.pot --locale=fr --output-file=po/fr.po

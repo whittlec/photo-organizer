@@ -1,2 +1,9 @@
 # Add one locale code per line when adding a translation, e.g. fr.
 en_GB
+de
+fr
+es
+cy
+it
+nl
+ja

@@ -1,0 +1,200 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: photo-organizer 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-05 19:36+0000\n"
+"PO-Revision-Date: 2026-11-05 19:42+0000\n"
+"Last-Translator: French translation team\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/main.vala:17 src/main.vala:23 src/main.vala:85
+msgid "Photo Organizer"
+msgstr "Organisateur de photos"
+
+#: src/main.vala:31
+msgid "About Photo Organizer"
+msgstr "À propos de l’organisateur de photos"
+
+#: src/main.vala:34
+msgid "Main Menu"
+msgstr "Menu principal"
+
+#: src/main.vala:39
+msgid "Choose Photo Folder…"
+msgstr "Choisir un dossier de photos…"
+
+#: src/main.vala:41
+msgid "No folder selected"
+msgstr "Aucun dossier sélectionné"
+
+#: src/main.vala:51
+#, c-format
+msgid ""
+"For exact duplicates, a name without a numbered suffix is preferred; "
+"otherwise the earliest-modified copy is moved into %s/YYYY/mm. Additional "
+"duplicates are counted and left where they are. When capture-date metadata "
+"is missing, the file’s modified date is used."
+msgstr ""
+"Pour les doublons exacts, un nom sans suffixe numérique est privilégié ; "
+"sinon, la copie dont la date de modification est la plus ancienne est "
+"déplacée vers %s/YYYY/mm. Les autres doublons sont comptabilisés et laissés "
+"sur place. En l’absence de métadonnées de date de prise de vue, la date de "
+"modification du fichier est utilisée."
+
+#: src/main.vala:60
+msgid "Choose a folder to get started."
+msgstr "Choisissez un dossier pour commencer."
+
+#: src/main.vala:61
+msgid "Analyze and Organize"
+msgstr "Analyser et organiser"
+
+#: src/main.vala:87
+msgid "Photo Organizer contributors"
+msgstr "Contributeurs à l’organisateur de photos"
+
+#: src/main.vala:88
+msgid "Organize photos by capture date and find exact duplicates."
+msgstr "Organiser les photos par date de prise de vue et trouver les doublons exacts."
+
+#: src/main.vala:93
+msgid "Choose Photo Folder"
+msgstr "Choisir un dossier de photos"
+
+#: src/main.vala:104
+msgid "Ready to analyze the selected folder."
+msgstr "Le dossier sélectionné est prêt à être analysé."
+
+#: src/main.vala:107
+#, c-format
+msgid "Could not choose a folder: %s"
+msgstr "Impossible de choisir un dossier : %s"
+
+#: src/main.vala:121
+msgid "Starting…"
+msgstr "Démarrage…"
+
+#: src/main.vala:131
+#, c-format
+msgid "%.0f%%"
+msgstr "%.0f%%"
+
+#: src/main.vala:156
+#, c-format
+msgid "Moved %u unique photo."
+msgid_plural "Moved %u unique photos."
+msgstr[0] "%u photo unique déplacée."
+msgstr[1] "%u photos uniques déplacées."
+
+#: src/main.vala:159
+#, c-format
+msgid "Skipped %u duplicate file, leaving it in place."
+msgid_plural "Skipped %u duplicate files, leaving them in place."
+msgstr[0] "%u fichier en double ignoré et laissé à sa place."
+msgstr[1] "%u fichiers en double ignorés et laissés à leur place."
+
+#: src/main.vala:164
+#, c-format
+msgid "Used the file date for %u photo."
+msgid_plural "Used the file date for %u photos."
+msgstr[0] "La date du fichier a été utilisée pour %u photo."
+msgstr[1] "La date du fichier a été utilisée pour %u photos."
+
+#: src/main.vala:175
+#, c-format
+msgid "%u issue: %s"
+msgid_plural "%u issues: %s"
+msgstr[0] "%u problème : %s"
+msgstr[1] "%u problèmes : %s"
+
+#: src/main.vala:180
+#, c-format
+msgid ""
+"The file system did not allow setting the creation time for %u photo; "
+"modification times were set where possible."
+msgid_plural ""
+"The file system did not allow setting the creation time for %u photos; "
+"modification times were set where possible."
+msgstr[0] ""
+"Le système de fichiers n’a pas permis de définir la date de création pour "
+"%u photo ; les dates de modification ont été définies lorsque possible."
+msgstr[1] ""
+"Le système de fichiers n’a pas permis de définir la date de création pour "
+"%u photos ; les dates de modification ont été définies lorsque possible."
+
+#: src/main.vala:192
+#, c-format
+msgid "Could not organize photos: %s"
+msgstr "Impossible d’organiser les photos : %s"
+
+#: src/main.vala:200
+msgid "Complete"
+msgstr "Terminé"
+
+#: src/organizer.vala:106
+#, c-format
+msgid "Could not read modification time for %s: %s"
+msgstr "Impossible de lire la date de modification de %s : %s"
+
+#: src/organizer.vala:112
+#, c-format
+msgid "Could not scan %s: %s"
+msgstr "Impossible d’analyser %s : %s"
+
+#: src/organizer.vala:168
+#, c-format
+msgid "Output path must not be a symbolic link: %s"
+msgstr "Le chemin de sortie ne doit pas être un lien symbolique : %s"
+
+#: src/organizer.vala:205
+msgid "Selected folder must be a local directory."
+msgstr "Le dossier sélectionné doit être un répertoire local."
+
+#: src/organizer.vala:209
+#, c-format
+msgid "Selected folder does not exist: %s"
+msgstr "Le dossier sélectionné n’existe pas : %s"
+
+#: src/organizer.vala:214
+#, c-format
+msgid "Output directory must not be a symbolic link: %s"
+msgstr "Le répertoire de sortie ne doit pas être un lien symbolique : %s"
+
+#: src/organizer.vala:220
+msgid "Scanning for photos…"
+msgstr "Recherche de photos…"
+
+#: src/organizer.vala:247
+#, c-format
+msgid "Could not read %s: %s"
+msgstr "Impossible de lire %s : %s"
+
+#: src/organizer.vala:259
+#, c-format
+msgid "Checking photos (%d of %d)…"
+msgstr "Vérification des photos (%d sur %d)…"
+
+#: src/organizer.vala:307
+#, c-format
+msgid "Could not organize %s: %s"
+msgstr "Impossible d’organiser %s : %s"
+
+#: src/organizer.vala:320
+#, c-format
+msgid "Moved %s but could not set its modification time: %s"
+msgstr "%s a été déplacé, mais sa date de modification n’a pas pu être définie : %s"
+
+#: src/organizer.vala:338
+#, c-format
+msgid "Moved %s but could not set its creation time: %s"
+msgstr "%s a été déplacé, mais sa date de création n’a pas pu être définie : %s"
+
+#: src/organizer.vala:346
+#, c-format
+msgid "Organizing photos (%d of %d)…"
+msgstr "Organisation des photos (%d sur %d)…"
