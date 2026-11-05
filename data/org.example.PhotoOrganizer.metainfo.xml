@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.example.PhotoOrganizer</id>
+  <pkgname>photo-organizer</pkgname>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Photo Organizer</name>
+  <summary>Organize photos by capture date and find exact duplicates</summary>
+  <icon type="stock">org.example.PhotoOrganizer</icon>
+  <description>
+    <p>
+      Photo Organizer sorts photos into year and month folders using the date
+      each picture was taken. It can also identify exact duplicate files and
+      move the extra copies into a separate folder.
+    </p>
+    <ul>
+      <li>Reads capture dates from EXIF metadata, with a file-date fallback.</li>
+      <li>Finds byte-for-byte duplicates and keeps the best-named copy.</li>
+      <li>Leaves wallpaper slideshow photos and symbolic links untouched.</li>
+      <li>Shows progress while scanning and organizing.</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">org.example.PhotoOrganizer.desktop</launchable>
+  <provides>
+    <binary>photo-organizer</binary>
+  </provides>
+  <developer>
+    <name>William Whittle</name>
+  </developer>
+  <categories>
+    <category>Graphics</category>
+    <category>Photography</category>
+  </categories>
+  <keywords>
+    <keyword>photo</keyword>
+    <keyword>picture</keyword>
+    <keyword>image</keyword>
+    <keyword>duplicate</keyword>
+    <keyword>organize</keyword>
+    <keyword>organise</keyword>
+    <keyword>EXIF</keyword>
+  </keywords>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="money-advertising">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+  </content_rating>
+</component>

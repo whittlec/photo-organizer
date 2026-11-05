@@ -1,9 +1,11 @@
 [Desktop Entry]
 Name=Photo Organizer
+GenericName=Photo Organizer
 Comment=Organize photos by capture date and find exact duplicates
 Exec=photo-organizer
 Icon=org.example.PhotoOrganizer
 Terminal=false
 Type=Application
 Categories=Graphics;Photography;
+Keywords=photo;picture;image;duplicate;organize;organise;EXIF;
 StartupNotify=true

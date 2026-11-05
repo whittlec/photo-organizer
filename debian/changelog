@@ -1,3 +1,15 @@
+photo-organizer (0.1.0-3) trixie; urgency=medium
+
+  * Associate AppStream metadata with the Debian package and app icon.
+
+ -- William Whittle <whittlec@users.noreply.github.com>  Thu, 05 Nov 2026 20:44:00 +0000
+
+photo-organizer (0.1.0-2) trixie; urgency=medium
+
+  * Add AppStream metadata for GNOME Software.
+
+ -- William Whittle <whittlec@users.noreply.github.com>  Thu, 05 Nov 2026 20:40:00 +0000
+
 photo-organizer (0.1.0-1) trixie; urgency=medium
 
   * Initial Debian package for Debian Trixie.

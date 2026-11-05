@@ -45,6 +45,10 @@ install_data(
   'data/org.example.PhotoOrganizer.desktop',
   install_dir: join_paths(get_option('datadir'), 'applications'),
 )
+install_data(
+  'data/org.example.PhotoOrganizer.metainfo.xml',
+  install_dir: join_paths(get_option('datadir'), 'metainfo'),
+)
 
 test_exe = executable(
   'organizer-test',
