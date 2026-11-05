@@ -13,6 +13,46 @@ namespace PhotoOrganizer {
         }
     }
 
+    private bool has_collision_suffix (string path) {
+        string basename = Path.get_basename (path);
+        int extension_start = basename.last_index_of (".");
+        string stem = extension_start > 0
+            ? basename.substring (0, extension_start)
+            : basename;
+        int suffix_start = stem.last_index_of (" (");
+        if (suffix_start < 0 || !stem.has_suffix (")")) {
+            return false;
+        }
+
+        string? number_value = stem.substring (suffix_start + 2, stem.length - suffix_start - 3);
+        if (number_value == null || number_value.length == 0) {
+            return false;
+        }
+        string number = number_value;
+        for (int i = 0; i < number.length; i++) {
+            char digit = number[i];
+            if (digit < '0' || digit > '9') {
+                return false;
+            }
+        }
+        while (number.length > 1 && number[0] == '0') {
+            number = number.substring (1);
+        }
+        return number.length > 1 || number[0] > '1';
+    }
+
+    private class PhotoFile : Object {
+        public string path { get; private set; }
+        public uint64 modified_time { get; private set; }
+        public bool has_collision_suffix { get; private set; }
+
+        public PhotoFile (string path, uint64 modified_time) {
+            this.path = path;
+            this.modified_time = modified_time;
+            has_collision_suffix = PhotoOrganizer.has_collision_suffix (path);
+        }
+    }
+
     public delegate void ProgressCallback (string message, double fraction, bool determinate);
 
     private const string[] PHOTO_EXTENSIONS = {
@@ -36,7 +76,7 @@ namespace PhotoOrganizer {
     private void scan_directory (
         string directory,
         string output_directory,
-        ArrayList<string> photos,
+        ArrayList<PhotoFile> photos,
         ArrayList<string> errors
     ) {
         string canonical_directory = File.new_for_path (directory).get_path ();
@@ -56,7 +96,15 @@ namespace PhotoOrganizer {
                 if (FileUtils.test (path, FileTest.IS_DIR)) {
                     scan_directory (path, output_directory, photos, errors);
                 } else if (is_photo (path) && FileUtils.test (path, FileTest.IS_REGULAR)) {
-                    photos.add (path);
+                    try {
+                        FileInfo info = File.new_for_path (path).query_info (
+                            "time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS
+                        );
+                        photos.add (new PhotoFile (path, info.get_attribute_uint64 ("time::modified")));
+                    } catch (Error error) {
+                        errors.add ("Could not read modification time for %s: %s".printf (path, error.message));
+                        photos.add (new PhotoFile (path, uint64.MAX));
+                    }
                 }
             }
         } catch (FileError error) {
@@ -167,31 +215,43 @@ namespace PhotoOrganizer {
         string canonical_output = File.new_for_path (output).get_path ();
 
         OrganizeResult result = new OrganizeResult ();
-        ArrayList<string> photos = new ArrayList<string> ();
+        ArrayList<PhotoFile> photos = new ArrayList<PhotoFile> ();
         progress ("Scanning for photos…", 0, false);
         scan_directory (source, canonical_output, photos, result.errors);
+        photos.sort ((a, b) => {
+            if (a.has_collision_suffix != b.has_collision_suffix) {
+                return a.has_collision_suffix ? 1 : -1;
+            }
+            if (a.modified_time < b.modified_time) {
+                return -1;
+            }
+            if (a.modified_time > b.modified_time) {
+                return 1;
+            }
+            return strcmp (a.path, b.path);
+        });
 
-        HashMap<string, ArrayList<string>> groups = new HashMap<string, ArrayList<string>> ();
+        HashMap<string, ArrayList<PhotoFile>> groups = new HashMap<string, ArrayList<PhotoFile>> ();
         double photo_count = photos.size > 0 ? photos.size : 1;
         int hash_step = photos.size / 100;
         if (hash_step < 1) {
             hash_step = 1;
         }
         for (int i = 0; i < photos.size; i++) {
-            string path = photos[i];
+            PhotoFile photo = photos[i];
             string hash;
             try {
-                hash = sha256_file (path);
+                hash = sha256_file (photo.path);
             } catch (Error error) {
-                result.errors.add ("Could not read %s: %s".printf (path, error.message));
-                hash = "unreadable:%s".printf (path);
+                result.errors.add ("Could not read %s: %s".printf (photo.path, error.message));
+                hash = "unreadable:%s".printf (photo.path);
             }
-            ArrayList<string>? group = groups.get (hash);
+            ArrayList<PhotoFile>? group = groups.get (hash);
             if (group == null) {
-                group = new ArrayList<string> ();
+                group = new ArrayList<PhotoFile> ();
                 groups.set (hash, group);
             }
-            group.add (path);
+            group.add (photo);
 
             if ((i + 1) % hash_step == 0 || i + 1 == photos.size) {
                 progress (
@@ -202,15 +262,13 @@ namespace PhotoOrganizer {
             }
         }
 
-        ArrayList<string> photos_to_move = new ArrayList<string> ();
-        foreach (Map.Entry<string, ArrayList<string>> entry in groups.entries) {
-            ArrayList<string> group = entry.value;
+        ArrayList<PhotoFile> photos_to_move = new ArrayList<PhotoFile> ();
+        foreach (Map.Entry<string, ArrayList<PhotoFile>> entry in groups.entries) {
+            ArrayList<PhotoFile> group = entry.value;
             if (group.size > 1) {
                 result.duplicate_files += group.size - 1;
             }
-            foreach (string path in group) {
-                photos_to_move.add (path);
-            }
+            photos_to_move.add (group[0]);
         }
 
         ensure_directory (output);
@@ -221,11 +279,11 @@ namespace PhotoOrganizer {
         }
         double photos_to_move_count = photos_to_move.size > 0 ? photos_to_move.size : 1;
         for (int i = 0; i < photos_to_move.size; i++) {
-            string photo = photos_to_move[i];
+            PhotoFile photo = photos_to_move[i];
             try {
-                DateTime? captured = exif_capture_time (photo);
+                DateTime? captured = exif_capture_time (photo.path);
                 if (captured == null) {
-                    FileInfo info = File.new_for_path (photo).query_info (
+                    FileInfo info = File.new_for_path (photo.path).query_info (
                         "time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS
                     );
                     captured = new DateTime.from_unix_local ((int64) info.get_attribute_uint64 ("time::modified"));
@@ -235,11 +293,11 @@ namespace PhotoOrganizer {
                 ensure_directory (year_directory);
                 string month_directory = Path.build_filename (year_directory, captured.format ("%m"));
                 ensure_directory (month_directory);
-                string destination = unused_destination (month_directory, Path.get_basename (photo));
-                File.new_for_path (photo).move (File.new_for_path (destination), FileCopyFlags.NONE);
+                string destination = unused_destination (month_directory, Path.get_basename (photo.path));
+                File.new_for_path (photo.path).move (File.new_for_path (destination), FileCopyFlags.NONE);
                 result.photos_moved++;
             } catch (Error error) {
-                result.errors.add ("Could not organize %s: %s".printf (photo, error.message));
+                result.errors.add ("Could not organize %s: %s".printf (photo.path, error.message));
             }
 
             if ((i + 1) % move_step == 0 ||

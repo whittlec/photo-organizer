@@ -43,7 +43,7 @@ namespace PhotoOrganizer {
             folder_row.append (folder_label);
 
             Label explanation = new Label (
-                "Photos will be moved into Organized Photos/YYYY/mm. Exact duplicates are counted and kept; nothing is deleted. When capture-date metadata is missing, the file’s modified date is used."
+                "For exact duplicates, a name without a numbered suffix is preferred; otherwise the earliest-modified copy is moved into Organized Photos/YYYY/mm. Additional duplicates are counted and left where they are. When capture-date metadata is missing, the file’s modified date is used."
             ) {
                 xalign = 0,
                 wrap = true
@@ -148,7 +148,7 @@ namespace PhotoOrganizer {
 
         private void show_result (OrganizeResult result) {
             string summary =
-                "Moved %u photo(s). Found %u duplicate file(s); duplicates were kept. Used file dates for %u photo(s).".printf (
+                "Moved %u unique photo(s). Skipped %u duplicate file(s), leaving them in place. Used file dates for %u photo(s).".printf (
                     result.photos_moved, result.duplicate_files, result.filesystem_dates
                 );
             if (result.errors.size > 0) {

@@ -13,6 +13,18 @@ namespace PhotoOrganizer.Tests {
         }
     }
 
+    private void set_modified_time (string path, uint64 timestamp) {
+        try {
+            File.new_for_path (path).set_attribute_uint64 (
+                "time::modified",
+                timestamp,
+                FileQueryInfoFlags.NONE
+            );
+        } catch (Error error) {
+            Test.fail_printf ("Could not set test modification time: %s", error.message);
+        }
+    }
+
     private void write_photo_with_exif (string path) {
         try {
             Gdk.Pixbuf image = new Gdk.Pixbuf (Gdk.Colorspace.RGB, false, 8, 2, 2);
@@ -70,7 +82,7 @@ namespace PhotoOrganizer.Tests {
         }
     }
 
-    private void test_moves_photos_and_keeps_duplicates () {
+    private void test_moves_one_copy_and_leaves_duplicates_in_place () {
         string temporary = make_temporary_directory ();
         string nested = Path.build_filename (temporary, "nested");
         DirUtils.create (nested, 0755);
@@ -78,14 +90,38 @@ namespace PhotoOrganizer.Tests {
         string duplicate = Path.build_filename (nested, "duplicate.jpg");
         write_file (first, "same photo");
         write_file (duplicate, "same photo");
+        set_modified_time (first, 1700000000);
+        set_modified_time (duplicate, 1600000000);
 
         OrganizeResult result = organize_temporary_directory (temporary);
         string output = Path.build_filename (temporary, "Organized Photos");
         GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
-        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 2);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
         GLib.assert_cmpuint (result.duplicate_files, CompareOperator.EQ, 1);
-        GLib.assert_cmpuint (result.filesystem_dates, CompareOperator.EQ, 2);
-        GLib.assert_cmpuint (count_files (output), CompareOperator.EQ, 2);
+        GLib.assert_cmpuint (result.filesystem_dates, CompareOperator.EQ, 1);
+        GLib.assert_cmpuint (count_files (output), CompareOperator.EQ, 1);
+        GLib.assert_true (FileUtils.test (first, FileTest.EXISTS));
+        GLib.assert_false (FileUtils.test (duplicate, FileTest.EXISTS));
+        remove_tree (temporary);
+    }
+
+    private void test_prefers_unsuffixed_name_over_earlier_suffixed_copy () {
+        string temporary = make_temporary_directory ();
+        string original = Path.build_filename (temporary, "photo.jpg");
+        string suffixed_copy = Path.build_filename (temporary, "photo (2).jpg");
+        write_file (original, "same photo");
+        write_file (suffixed_copy, "same photo");
+        set_modified_time (suffixed_copy, 1500000000);
+        set_modified_time (original, 1700000000);
+
+        OrganizeResult result = organize_temporary_directory (temporary);
+        string output = Path.build_filename (temporary, "Organized Photos");
+        GLib.assert_cmpuint ((uint) result.errors.size, CompareOperator.EQ, 0);
+        GLib.assert_cmpuint (result.photos_moved, CompareOperator.EQ, 1);
+        GLib.assert_cmpuint (result.duplicate_files, CompareOperator.EQ, 1);
+        GLib.assert_true (FileUtils.test (suffixed_copy, FileTest.EXISTS));
+        GLib.assert_false (FileUtils.test (original, FileTest.EXISTS));
+        GLib.assert_cmpuint (count_files (output), CompareOperator.EQ, 1);
         remove_tree (temporary);
     }
 
@@ -124,7 +160,8 @@ namespace PhotoOrganizer.Tests {
 
     public static int main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/organizer/moves-and-keeps-duplicates", test_moves_photos_and_keeps_duplicates);
+        Test.add_func ("/organizer/moves-one-copy-and-leaves-duplicates", test_moves_one_copy_and_leaves_duplicates_in_place);
+        Test.add_func ("/organizer/prefers-unsuffixed-name", test_prefers_unsuffixed_name_over_earlier_suffixed_copy);
         Test.add_func ("/organizer/avoids-overwriting", test_avoids_overwriting_existing_photos);
         Test.add_func ("/organizer/uses-exif-capture-date", test_organizes_by_exif_capture_date);
         return Test.run ();

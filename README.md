@@ -2,13 +2,18 @@
 
 A GNOME application written in Vala with GTK 4 and libadwaita. It scans the
 chosen folder recursively, flags byte-for-byte duplicates using SHA-256, and
-moves recognized images into `Organized Photos/YYYY/mm` based on their EXIF
-capture date. If capture-date metadata is unavailable, the file's last-modified
-date is used.
+moves one copy of each unique image into `Organized Photos/YYYY/mm` based on
+its EXIF capture date. For byte-for-byte duplicates, a filename without the
+app's numbered collision suffix (such as ` (2)`) is preferred. If all copies
+have the same suffix status, the file with the earliest filesystem
+modification time is chosen. Other copies are counted and left at their
+original locations. This selection uses filesystem modification times, not
+EXIF dates. If capture-date metadata is unavailable, the selected file's
+last-modified date is used.
 
-Duplicates are reported but kept. Files with the same name receive a numbered
-suffix rather than being overwritten. The existing `Organized Photos`
-directory is excluded from subsequent scans.
+Files with the same name receive a numbered suffix rather than being
+overwritten. The existing `Organized Photos` directory is excluded from
+subsequent scans.
 
 ## Install and run
 
